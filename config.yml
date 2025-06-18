@@ -1,0 +1,10 @@
+server:
+  http:
+    port: 5001
+
+telegram:
+  bot_token:
+
+storage:
+  postgres:
+    dsn: "postgres://seller:seller@localhost:55432/bill_splitter?connect_timeout=10&sslmode=disable"
