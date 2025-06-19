@@ -29,15 +29,17 @@ func NewController(svc auth.Service, logger *slog.Logger) Controller {
 	}
 }
 
-// @LoginTelegram Create user
-// @Description create by json user
-// @Tags users
-// @Accept  json
-// @Produce  json
-// @Param   user  body  User  true  "Add user"
-// @Success 200 {object} User
-// @Router /users [post]
-
+// LoginTelegram godoc
+// @Summary      Авторизация через Telegram
+// @Description  Создаёт или получает пользователя по Telegram ID и возвращает sessionID
+// @Tags         auth
+// @Accept       json
+// @Produce      json
+// @Param        request  body      LoginTelegramReq  true  "Данные пользователя из Telegram"
+// @Success      200      {object}  LoginTelegramRes
+// @Failure      400      {object}  hu.ErrorResponse  "Некорректный запрос"
+// @Failure      500      {object}  hu.ErrorResponse  "Internal Server Error, но в debug моде возвращает детали ошибки"
+// @Router       /auth/login/telegram [post]
 func (c *controllerImpl) LoginTelegram(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 	l := c.l().With("method", "LoginTelegram")
@@ -76,6 +78,14 @@ func (c *controllerImpl) LoginTelegram(w http.ResponseWriter, r *http.Request) {
 	})
 }
 
+// Me godoc
+// @Summary      Получить данные текущего пользователя
+// @Description  Возвращает данные пользователя, извлечённые по sessionID из контекста
+// @Tags         auth
+// @Produce      json
+// @Success      200  {object}  MeRes
+// @Failure      400  {object}  hu.ErrorResponse  "Пользователь не найден или сессия невалидна"
+// @Router       /auth/me [get]
 func (c *controllerImpl) Me(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 	l := c.l().With("method", "Me")
