@@ -7,7 +7,8 @@ import (
 )
 
 var (
-	configPath string = ".config.yml"
+	configPath = "."
+	debug      = false
 )
 
 type Telegram struct {
@@ -32,8 +33,13 @@ type Postgres struct {
 }
 
 type Config struct {
+	Debug   bool
 	Server  Server
 	Storage Storage
+}
+
+func IsDebug() bool {
+	return debug
 }
 
 func LoadConfig() (Config, error) {
@@ -50,6 +56,8 @@ func LoadConfig() (Config, error) {
 	if err := v.Unmarshal(&cfg); err != nil {
 		return Config{}, fmt.Errorf("failed to unmarshal config: %w", err)
 	}
+
+	debug = cfg.Debug
 
 	return cfg, nil
 }

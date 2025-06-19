@@ -2,15 +2,11 @@ package session
 
 import (
 	"context"
-	"errors"
-	"time"
+	stderrors "errors"
 
 	"billsplitter-monolith/internal/domain/auth"
+	"billsplitter-monolith/internal/errors"
 	"gorm.io/gorm"
-)
-
-const (
-	sessionLiveTime = time.Hour
 )
 
 type Storage struct {
@@ -25,16 +21,11 @@ func NewStorage(db *gorm.DB, cache auth.SessionCache) auth.SessionStorage {
 	}
 }
 
-func (s *Storage) Create(ctx context.Context, userID string) error {
-	expire := time.Now().Add(sessionLiveTime)
+func (s *Storage) Create(ctx context.Context, session *auth.Session) error {
+	e := fromDomain(session)
 
-	session := &auth.Session{
-		UserID:   userID,
-		ExpireAt: &expire,
-	}
-
-	if err := s.db.WithContext(ctx).Create(session).Error; err != nil {
-		return err
+	if err := s.db.WithContext(ctx).Create(e).Error; err != nil {
+		return errors.ErrSessionStorageFunc(err, "create")
 	}
 
 	// TODO: set cache
@@ -43,20 +34,19 @@ func (s *Storage) Create(ctx context.Context, userID string) error {
 }
 
 func (s *Storage) Get(ctx context.Context, id string) (*auth.Session, error) {
-	var session auth.Session
+	e := &sessionEntity{}
 
 	// TODO: get cache
 
 	err := s.db.WithContext(ctx).
-		Where("id = ? AND deleted_at IS null", id).
-		First(&session).Error
-
+		Where("id = ? AND deleted_at IS null AND expire_at > now()::timestamptz", id).
+		First(&e).Error
 	if err != nil {
-		if errors.Is(err, gorm.ErrRecordNotFound) {
+		if stderrors.Is(err, gorm.ErrRecordNotFound) {
 			return nil, nil
 		}
-		return nil, err
+		return nil, errors.ErrSessionStorageFunc(err, "get")
 	}
 
-	return &session, nil
+	return toDomain(e), nil
 }

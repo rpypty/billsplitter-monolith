@@ -9,6 +9,7 @@ import (
 	"syscall"
 	"time"
 
+	"billsplitter-monolith/internal/transport/http/middleware"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 	"gorm.io/gorm/logger"
@@ -44,19 +45,22 @@ func main() {
 	authSvc := authsvc.New(userStorage, sessionStorage, l)
 
 	// init http server
-	authCtrl := authhttp.NewController(authSvc)
-	httpServer := http.NewServer(authCtrl, l)
+	mw := middleware.NewMiddlewareManager(authSvc, l)
+	authCtrl := authhttp.NewController(authSvc, l)
+	httpServer := http.NewServer(mw, authCtrl, l)
 
 	go func() {
 		err := httpServer.Start(ctx, appCfg.Server.Http)
 		if err != nil {
 			l.WithGroup("main").ErrorContext(ctx, err.Error())
+			quit <- os.Interrupt
 		}
 	}()
 
 	// Graceful stop
 	l.WithGroup("main").InfoContext(ctx, "waiting app to stop...")
 	<-quit
+	cancel()
 	l.WithGroup("main").InfoContext(ctx, "cancel signal has been received, stopping app...")
 
 	err := httpServer.Stop(ctx)

@@ -2,10 +2,12 @@ package user
 
 import (
 	"context"
-	"errors"
+	stderrors "errors"
+
+	"gorm.io/gorm"
 
 	"billsplitter-monolith/internal/domain/auth"
-	"gorm.io/gorm"
+	"billsplitter-monolith/internal/errors"
 )
 
 type Storage struct {
@@ -19,31 +21,32 @@ func NewStorage(db *gorm.DB) auth.UserStorage {
 }
 
 func (s *Storage) GetByTelegramID(ctx context.Context, telegramID int64) (*auth.User, error) {
-	user := auth.User{}
+	user := &userEntity{}
 
-	if err := s.db.WithContext(ctx).Where("telegram_id = ?", telegramID).First(&user).Error; err != nil {
-		if errors.Is(err, gorm.ErrRecordNotFound) {
+	if err := s.db.WithContext(ctx).Where("(extra->>'telegram_id')::int = ?", telegramID).First(&user).Error; err != nil {
+		if stderrors.Is(err, gorm.ErrRecordNotFound) {
 			return nil, nil
 		}
-		return nil, err
+		return nil, errors.ErrUserStorageFunc(err, "GetByTelegramID")
 	}
 
-	return &user, nil
+	return toDomain(user), nil
 }
 
 func (s *Storage) GetByID(ctx context.Context, id string) (*auth.User, error) {
-	user := auth.User{}
+	user := &userEntity{}
 
 	if err := s.db.WithContext(ctx).First(&user, "id = ?", id).Error; err != nil {
-		if errors.Is(err, gorm.ErrRecordNotFound) {
+		if stderrors.Is(err, gorm.ErrRecordNotFound) {
 			return nil, nil
 		}
-		return nil, err
+		return nil, errors.ErrUserStorageFunc(err, "GetByID")
 	}
 
-	return &user, nil
+	return toDomain(user), nil
 }
 
 func (s *Storage) Create(ctx context.Context, user *auth.User) error {
-	return s.db.WithContext(ctx).Create(user).Error
+	e := fromDomain(user)
+	return s.db.WithContext(ctx).Create(e).Error
 }

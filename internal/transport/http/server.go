@@ -4,28 +4,37 @@ import (
 	"context"
 	"log/slog"
 	"net/http"
+	"time"
+
+	"github.com/go-chi/chi/v5"
+	"github.com/go-chi/chi/v5/middleware"
 
 	"billsplitter-monolith/internal/cfg"
 	"billsplitter-monolith/internal/transport/http/auth"
-	"github.com/go-chi/chi/v5"
-	"github.com/go-chi/chi/v5/middleware"
+	mw "billsplitter-monolith/internal/transport/http/middleware"
 )
 
 type Server struct {
-	logger   *slog.Logger
-	authCtrl *auth.Controller
+	authCtrl auth.Controller
+	mw       mw.Manager
 
 	httpSrv *http.Server
+	logger  *slog.Logger
 }
 
-func NewServer(authCtrl *auth.Controller, logger *slog.Logger) *Server {
+func NewServer(
+	mw mw.Manager,
+	authCtrl auth.Controller,
+	logger *slog.Logger,
+) *Server {
 	return &Server{
-		logger:   logger,
 		authCtrl: authCtrl,
+		logger:   logger,
+		mw:       mw,
 	}
 }
 
-func (s *Server) Start(ctx context.Context, cfg cfg.Http) error {
+func (s *Server) Start(_ context.Context, cfg cfg.Http) error {
 	l := s.l()
 
 	r := chi.NewRouter()
@@ -33,17 +42,22 @@ func (s *Server) Start(ctx context.Context, cfg cfg.Http) error {
 	r.Use(middleware.RequestID)
 	r.Use(middleware.Logger)
 	r.Use(middleware.Recoverer)
-	r.Use(middleware.Timeout(60))
+	r.Use(middleware.Timeout(time.Second * 20))
 
 	// init routes
-	auth.InitRoutes(r, s.authCtrl)
+	auth.InitRoutes(r, s.authCtrl, s.mw)
 
 	s.httpSrv = &http.Server{
-		Addr:    cfg.Port,
-		Handler: r,
+		Addr:              cfg.Port,
+		Handler:           r,
+		ReadTimeout:       15 * time.Second,
+		ReadHeaderTimeout: 5 * time.Second,
+		WriteTimeout:      15 * time.Second,
+		IdleTimeout:       60 * time.Second,
 	}
 
-	l.InfoContext(ctx, "starting http server on port: "+cfg.Port)
+	l.Info("starting http server on port: " + cfg.Port)
+
 	if err := s.httpSrv.ListenAndServe(); err != nil {
 		return err
 	}
@@ -52,6 +66,7 @@ func (s *Server) Start(ctx context.Context, cfg cfg.Http) error {
 }
 
 func (s *Server) Stop(ctx context.Context) error {
+	s.l().Info("shutting down http server")
 	return s.httpSrv.Shutdown(ctx)
 }
 

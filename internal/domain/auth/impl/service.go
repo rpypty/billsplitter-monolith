@@ -3,10 +3,15 @@ package impl
 import (
 	"context"
 	"log/slog"
+	"time"
 
 	"billsplitter-monolith/internal/domain/auth"
 	"billsplitter-monolith/internal/errors"
 	"billsplitter-monolith/internal/utils"
+)
+
+const (
+	sessionLiveTime = time.Second * 10
 )
 
 type Service struct {
@@ -31,33 +36,41 @@ func New(
 func (s *Service) GetUserBySessionID(ctx context.Context, sessionID string) (*auth.User, error) {
 	session, err := s.sessionStorage.Get(ctx, sessionID)
 	if err != nil {
-		return nil, err
+		return nil, errors.ErrUserServiceFunc(err, "GetUserBySessionID")
 	}
 
 	if session == nil {
-		return nil, errors.ErrSessionNotFound
+		return nil, errors.ErrUserServiceFunc(errors.ErrSessionNotFound, "GetUserBySessionID")
 	}
 
 	return s.userStorage.GetByID(ctx, session.UserID)
 }
 
 func (s *Service) CreateSession(ctx context.Context, session *auth.Session) (string, error) {
+	mth := "CreateSession"
+
 	if session.ID == "" {
 		session.ID = utils.NewUUIDv7()
 	}
 
-	err := s.sessionStorage.Create(ctx, session.UserID)
+	if session.ExpireAt == nil {
+		session.ExpireAt = utils.Ptr(time.Now().Add(sessionLiveTime))
+	}
+
+	err := s.sessionStorage.Create(ctx, session)
 	if err != nil {
-		return "", err
+		return "", errors.ErrUserServiceFunc(err, mth)
 	}
 
 	return session.ID, nil
 }
 
 func (s *Service) CreateOrGetUserByTgID(ctx context.Context, tgID int64, data *auth.User) (*auth.User, error) {
+	mth := "CreateOrGetUserByTgID"
+
 	existing, err := s.userStorage.GetByTelegramID(ctx, tgID)
 	if err != nil {
-		return nil, err
+		return nil, errors.ErrUserServiceFunc(err, mth)
 	}
 	if existing != nil {
 		return existing, nil
@@ -68,12 +81,21 @@ func (s *Service) CreateOrGetUserByTgID(ctx context.Context, tgID int64, data *a
 		data.ID = utils.NewUUIDv7()
 	}
 
-	err = s.userStorage.Create(ctx, data)
-	if err != nil {
-		return nil, err
+	if data.Extra.TelegramID == 0 {
+		data.Extra.TelegramID = tgID
 	}
 
-	return s.userStorage.GetByID(ctx, data.ID)
+	err = s.userStorage.Create(ctx, data)
+	if err != nil {
+		return nil, errors.ErrUserServiceFunc(err, mth)
+	}
+
+	u, err := s.userStorage.GetByID(ctx, data.ID)
+	if err != nil {
+		return nil, errors.ErrUserServiceFunc(err, mth)
+	}
+
+	return u, nil
 }
 
 func (s *Service) l() *slog.Logger {

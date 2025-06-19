@@ -23,6 +23,6 @@ type SessionCache interface {
 }
 
 type SessionStorage interface {
-	Create(ctx context.Context, userID string) error
+	Create(ctx context.Context, session *Session) error
 	Get(ctx context.Context, id string) (*Session, error)
 }

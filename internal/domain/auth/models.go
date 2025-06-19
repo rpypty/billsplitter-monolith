@@ -2,16 +2,13 @@ package auth
 
 import (
 	"time"
-
-	"gorm.io/gorm"
 )
 
 type UserExtra struct {
-	TelegramID string `json:"telegram_id"`
+	TelegramID int64 `json:"telegram_id,omitempty"`
 }
 
 type User struct {
-	gorm.Model
 	ID        string
 	Username  string
 	FirstName string
@@ -20,7 +17,6 @@ type User struct {
 }
 
 type Session struct {
-	gorm.Model
 	ID       string
 	UserID   string
 	ExpireAt *time.Time
