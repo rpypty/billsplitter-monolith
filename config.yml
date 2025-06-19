@@ -8,4 +8,4 @@ telegram:
 
 storage:
   postgres:
-    dsn: "postgres://seller:seller@localhost:55433/bill_splitter?sslmode=disable&connect_timeout=5"
+    dsn: "postgres://admin:admin@localhost:55433/bill_splitter?sslmode=disable&connect_timeout=5"

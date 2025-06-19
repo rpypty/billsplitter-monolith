@@ -11,7 +11,7 @@ import (
 )
 
 const (
-	sessionLiveTime = time.Second * 10
+	sessionLiveTime = time.Minute * 30
 )
 
 type Service struct {
