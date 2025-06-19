@@ -1,0 +1,11 @@
+debug: true
+server:
+  http:
+    port: ":5001"
+
+telegram:
+  bot_token:
+
+storage:
+  postgres:
+    dsn: "postgres://seller:seller@localhost:55433/bill_splitter?sslmode=disable&connect_timeout=5"

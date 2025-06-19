@@ -24,6 +24,12 @@ goose -dir internal/db/migrations create <file_name> sql
 
 #### 3. Применение миграции (up)
 ```
-goose -dir db/migrations postgres "postgres://user:pass@localhost:5432/dbname?sslmode=disable" up
+goose -dir internal/db/migrations postgres "postgres://seller:seller@localhost:55433/bill_splitter?sslmode=disable&connect_timeout=5" up
 ```
 
+## Докер
+
+#### 4. Поднять инфру
+```bash
+docker-compose up --build -d
+```
