@@ -9,7 +9,6 @@ import (
 	"syscall"
 	"time"
 
-	"billsplitter-monolith/internal/transport/http/middleware"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 	"gorm.io/gorm/logger"
@@ -20,9 +19,16 @@ import (
 	userstorage "billsplitter-monolith/internal/repository/storage/user"
 	"billsplitter-monolith/internal/transport/http"
 	authhttp "billsplitter-monolith/internal/transport/http/auth"
+	"billsplitter-monolith/internal/transport/http/middleware"
 	"billsplitter-monolith/internal/utils"
 )
 
+// @title           BillSplitter API
+// @version         1.0
+// @description     API для Telegram Mini App по разделению счетов
+// @host            localhost:5001
+// @BasePath        /
+// @schemes         http
 func main() {
 	l := slog.New(slog.NewJSONHandler(os.Stdout, nil))
 

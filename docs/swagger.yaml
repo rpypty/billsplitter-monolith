@@ -1,0 +1,110 @@
+basePath: /
+definitions:
+  billsplitter-monolith_internal_domain_auth.User:
+    properties:
+      extra:
+        $ref: '#/definitions/billsplitter-monolith_internal_domain_auth.UserExtra'
+      firstName:
+        type: string
+      id:
+        type: string
+      lastName:
+        type: string
+      username:
+        type: string
+    type: object
+  billsplitter-monolith_internal_domain_auth.UserExtra:
+    properties:
+      telegram_id:
+        type: integer
+    type: object
+  billsplitter-monolith_internal_utils_http.ErrorResponse:
+    properties:
+      errorMessage:
+        type: string
+    type: object
+  internal_transport_http_auth.LoginTelegramReq:
+    properties:
+      firstName:
+        example: John
+        type: string
+      lastName:
+        example: Doe
+        type: string
+      telegramID:
+        example: 123456789
+        type: integer
+      username:
+        example: johndoe
+        type: string
+    required:
+    - telegramID
+    type: object
+  internal_transport_http_auth.LoginTelegramRes:
+    properties:
+      sessionID:
+        example: b42b0a8e-0d1f-4c3d-939f-85fbbdc9be62
+        type: string
+    type: object
+  internal_transport_http_auth.MeRes:
+    properties:
+      user:
+        $ref: '#/definitions/billsplitter-monolith_internal_domain_auth.User'
+    type: object
+host: localhost:5001
+info:
+  contact: {}
+  description: API для Telegram Mini App по разделению счетов
+  title: BillSplitter API
+  version: "1.0"
+paths:
+  /auth/login/telegram:
+    post:
+      consumes:
+      - application/json
+      description: Создаёт или получает пользователя по Telegram ID и возвращает sessionID
+      parameters:
+      - description: Данные пользователя из Telegram
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/internal_transport_http_auth.LoginTelegramReq'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/internal_transport_http_auth.LoginTelegramRes'
+        "400":
+          description: Некорректный запрос
+          schema:
+            $ref: '#/definitions/billsplitter-monolith_internal_utils_http.ErrorResponse'
+        "500":
+          description: Internal Server Error, но в debug моде возвращает детали ошибки
+          schema:
+            $ref: '#/definitions/billsplitter-monolith_internal_utils_http.ErrorResponse'
+      summary: Авторизация через Telegram
+      tags:
+      - auth
+  /auth/me:
+    get:
+      description: Возвращает данные пользователя, извлечённые по sessionID из контекста
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/internal_transport_http_auth.MeRes'
+        "400":
+          description: Пользователь не найден или сессия невалидна
+          schema:
+            $ref: '#/definitions/billsplitter-monolith_internal_utils_http.ErrorResponse'
+      summary: Получить данные текущего пользователя
+      tags:
+      - auth
+schemes:
+- http
+swagger: "2.0"

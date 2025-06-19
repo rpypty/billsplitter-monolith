@@ -33,3 +33,20 @@ goose -dir internal/db/migrations postgres "postgres://seller:seller@localhost:5
 ```bash
 docker-compose up --build -d
 ```
+
+## Swagger
+
+#### 1. Установка
+
+```bash
+go install github.com/swaggo/swag/cmd/swag@latest
+swag --version
+```
+
+#### 2. Генерация
+
+```bash
+swag init --parseDependency --parseInternal -g ./cmd/main.go
+```
+Это создаст папку /docs с файлом docs.go.
+

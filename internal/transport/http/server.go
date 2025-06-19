@@ -12,6 +12,10 @@ import (
 	"billsplitter-monolith/internal/cfg"
 	"billsplitter-monolith/internal/transport/http/auth"
 	mw "billsplitter-monolith/internal/transport/http/middleware"
+
+	httpswagger "github.com/swaggo/http-swagger"
+
+	_ "billsplitter-monolith/docs" // важно: импорт с подчёркиванием!
 )
 
 type Server struct {
@@ -43,6 +47,8 @@ func (s *Server) Start(_ context.Context, cfg cfg.Http) error {
 	r.Use(middleware.Logger)
 	r.Use(middleware.Recoverer)
 	r.Use(middleware.Timeout(time.Second * 20))
+
+	r.Get("/swagger/*", httpswagger.WrapHandler)
 
 	// init routes
 	auth.InitRoutes(r, s.authCtrl, s.mw)
