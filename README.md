@@ -1,10 +1,15 @@
 # Bill Splitter - бэк, монолит
 
-## Запуск
+## Локальный запуск
+
 ```bash
-go build -o bin/billsplitter ./cmd
-go run ./cmd/main.go
+make compose # поднимает инфру в докере 
+make run     # запуска go app
 ```
+Сервер будет доступен на порту из конфига (config.yml), по дефолту: http://localhost:5001
+
+Сваггер доступен на http://localhost:5001/swagger/
+
 
 ## Конифг
 
