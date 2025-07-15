@@ -15,6 +15,9 @@ github.com/gabriel-vasile/mimetype/internal/magic
 ## explicit; go 1.20
 github.com/go-chi/chi/v5
 github.com/go-chi/chi/v5/middleware
+# github.com/go-chi/cors v1.2.2
+## explicit; go 1.14
+github.com/go-chi/cors
 # github.com/go-openapi/jsonpointer v0.19.5
 ## explicit; go 1.13
 github.com/go-openapi/jsonpointer

@@ -6,12 +6,12 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/go-chi/chi/v5"
-	"github.com/go-chi/chi/v5/middleware"
-
 	"billsplitter-monolith/internal/cfg"
 	"billsplitter-monolith/internal/transport/http/auth"
 	mw "billsplitter-monolith/internal/transport/http/middleware"
+	"github.com/go-chi/chi/v5"
+	"github.com/go-chi/chi/v5/middleware"
+	"github.com/go-chi/cors"
 
 	httpswagger "github.com/swaggo/http-swagger"
 
@@ -42,6 +42,16 @@ func (s *Server) Start(_ context.Context, cfg cfg.Http) error {
 	l := s.l()
 
 	r := chi.NewRouter()
+
+	// Настройка CORS middleware
+	r.Use(cors.Handler(cors.Options{
+		AllowedOrigins:   []string{"*"}, // Разрешить все origin
+		AllowedMethods:   []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
+		AllowedHeaders:   []string{"Accept", "Authorization", "Content-Type", "X-CSRF-Token"},
+		ExposedHeaders:   []string{"Link"},
+		AllowCredentials: false,
+		MaxAge:           300, // Максимальное время кеширования preflight запроса
+	}))
 
 	r.Use(middleware.RequestID)
 	r.Use(middleware.Logger)
