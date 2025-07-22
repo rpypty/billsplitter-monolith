@@ -24,15 +24,12 @@ func RespondErrWithStatusf(w http.ResponseWriter, status int, msg string, args .
 }
 
 func RespondJson(w http.ResponseWriter, data any) {
-	w.WriteHeader(http.StatusOK)
-	w.Header().Add("Content-Type", "application/json")
-	bytes := MustMarshal(data)
-	_, _ = w.Write(bytes)
+	RespondJsonWithStatus(w, http.StatusOK, data)
 }
 
 func RespondJsonWithStatus(w http.ResponseWriter, status int, data any) {
-	w.WriteHeader(status)
 	w.Header().Add("Content-Type", "application/json")
+	w.WriteHeader(status)
 	bytes := MustMarshal(data)
 	_, _ = w.Write(bytes)
 }

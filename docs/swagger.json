@@ -152,6 +152,9 @@
                 "sessionID": {
                     "type": "string",
                     "example": "b42b0a8e-0d1f-4c3d-939f-85fbbdc9be62"
+                },
+                "userInfo": {
+                    "$ref": "#/definitions/billsplitter-monolith_internal_domain_auth.User"
                 }
             }
         },

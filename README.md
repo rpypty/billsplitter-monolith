@@ -29,7 +29,7 @@ goose -dir internal/db/migrations create <file_name> sql
 
 #### 3. Применение миграции (up)
 ```
-goose -dir internal/db/migrations postgres "postgres://seller:seller@localhost:55433/bill_splitter?sslmode=disable&connect_timeout=5" up
+goose -dir internal/db/migrations postgres "postgres://admin:admin@localhost:55433/bill_splitter?sslmode=disable&connect_timeout=5" up
 ```
 
 ## Докер
@@ -55,3 +55,9 @@ swag init --parseDependency --parseInternal -g ./cmd/main.go
 ```
 Это создаст папку /docs с файлом docs.go.
 
+
+
+## Перед коммитом:
+```
+make pre-commit
+```

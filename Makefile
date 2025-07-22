@@ -7,7 +7,7 @@ compose:
 	docker-compose up --build -d
 
 compose-down:
-	docker-compose down -v
+	docker-compose down
 
 run:
 	go run ./cmd/main.go
@@ -18,3 +18,8 @@ migrate:
 swagger:
 	swag init --parseDependency --parseInternal -g ./cmd/main.go
 
+pre-commit:
+	make gop
+	# make mocks
+	# make test
+	make swagger

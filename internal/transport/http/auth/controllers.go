@@ -75,6 +75,7 @@ func (c *controllerImpl) LoginTelegram(w http.ResponseWriter, r *http.Request) {
 
 	hu.RespondJson(w, &LoginTelegramRes{
 		SessionID: sessionID,
+		UserInfo:  user,
 	})
 }
 
