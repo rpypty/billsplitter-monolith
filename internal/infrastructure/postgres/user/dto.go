@@ -1,7 +1,7 @@
 package user
 
 import (
-	"billsplitter-monolith/internal/domain/auth"
+	domain "billsplitter-monolith/internal/domain/user"
 	"billsplitter-monolith/internal/utils/pg"
 	"github.com/jackc/pgtype"
 	"gorm.io/gorm"
@@ -9,7 +9,7 @@ import (
 
 type userEntity struct {
 	gorm.Model
-	ID        string        `gorm:"column:id"`
+	ID        int64         `gorm:"column:id"`
 	Username  string        `gorm:"column:username"`
 	FirstName string        `gorm:"column:first_name"`
 	LastName  string        `gorm:"column:last_name"`
@@ -20,7 +20,7 @@ func (userEntity) TableName() string {
 	return "users"
 }
 
-func fromDomain(d *auth.User) *userEntity {
+func fromDomain(d *domain.User) *userEntity {
 	if d == nil {
 		return nil
 	}
@@ -36,20 +36,20 @@ func fromDomain(d *auth.User) *userEntity {
 	}
 }
 
-func toDomain(e *userEntity) *auth.User {
+func toDomain(e *userEntity) *domain.User {
 	if e == nil {
 		return nil
 	}
 
-	out := auth.User{
+	out := domain.User{
 		ID:        e.ID,
 		Username:  e.Username,
 		FirstName: e.FirstName,
 		LastName:  e.LastName,
-		Extra:     auth.UserExtra{},
+		Extra:     domain.ExtraInfo{},
 	}
 
-	v, _ := pg.FromJsonb[auth.UserExtra](e.Extra)
+	v, _ := pg.FromJsonb[domain.ExtraInfo](e.Extra)
 	if v != nil {
 		out.Extra = *v
 	}

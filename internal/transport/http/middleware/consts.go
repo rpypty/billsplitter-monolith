@@ -1,7 +1,7 @@
 package middleware
 
 const (
-	userContextKey ctxKey = "user"
-	xSessionID            = "X-Session-ID"
-	Unauthorized          = "Unauthorized"
+	sessionContextKey ctxKey = "session"
+	xSessionID               = "X-Session-ID"
+	Unauthorized             = "Unauthorized"
 )
