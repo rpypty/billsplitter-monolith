@@ -10,6 +10,10 @@ make run     # запуска go app
 
 Сваггер доступен на http://localhost:5001/swagger/
 
+Зайти в базу
+```
+psql -h localhost -p 55433 -U admin -d bill_splitter
+```
 
 ## Конифг
 

@@ -21,6 +21,7 @@ import (
 	"billsplitter-monolith/internal/transport/http"
 	authhttp "billsplitter-monolith/internal/transport/http/auth"
 	"billsplitter-monolith/internal/transport/http/middleware"
+	userhttp "billsplitter-monolith/internal/transport/http/user"
 	useruc "billsplitter-monolith/internal/usecase/user"
 	"billsplitter-monolith/internal/utils"
 )
@@ -57,8 +58,9 @@ func main() {
 
 	// init http server
 	mw := middleware.NewMiddlewareManager(sessionSvc, l)
-	authCtrl := authhttp.NewController(userUC, sessionSvc, l)
-	httpServer := http.NewServer(mw, authCtrl, l)
+	authCtrl := authhttp.NewController(userUC, userSvc, sessionSvc, l)
+	userCtrl := userhttp.NewController(userSvc, l)
+	httpServer := http.NewServer(mw, authCtrl, userCtrl, l)
 
 	go func() {
 		err := httpServer.Start(ctx, appCfg.Server.Http)

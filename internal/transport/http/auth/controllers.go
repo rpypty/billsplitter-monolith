@@ -26,9 +26,15 @@ type controllerImpl struct {
 	logger     *slog.Logger
 }
 
-func NewController(userUC useruc.UseCase, sessionSvc session.Service, logger *slog.Logger) Controller {
+func NewController(
+	userUC useruc.UseCase,
+	userSvc user.Service,
+	sessionSvc session.Service,
+	logger *slog.Logger,
+) Controller {
 	return &controllerImpl{
 		userUC:     userUC,
+		userSvc:    userSvc,
 		sessionSvc: sessionSvc,
 		logger:     logger,
 	}

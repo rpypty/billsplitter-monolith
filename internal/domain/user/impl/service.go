@@ -71,7 +71,7 @@ func (s *ServiceImpl) Create(ctx context.Context, user domain.User) (*domain.Use
 
 	err := validateUser(user)
 	if err != nil {
-		return nil, errWrap(err)
+		return nil, err
 	}
 
 	userInfo, err := s.repo.GetByTelegramID(ctx, user.Extra.TelegramID)
@@ -98,7 +98,7 @@ func (s *ServiceImpl) Update(ctx context.Context, id int64, user domain.User) er
 
 	err := validateUser(user)
 	if err != nil {
-		return errWrap(err)
+		return err
 	}
 
 	err = s.repo.Update(ctx, id, user)
@@ -115,6 +115,12 @@ func validateUser(user domain.User) error {
 	if user.Username == "" {
 		return errors.ErrValidationFunc("user name is required")
 	}
+
+	if len(user.Username) < 5 {
+		return errors.ErrValidationFunc("user name must be at least 5 characters")
+	}
+
+	// TODO: add unique username validation
 
 	return nil
 }

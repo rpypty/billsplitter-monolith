@@ -9,6 +9,7 @@ import (
 	"billsplitter-monolith/internal/cfg"
 	"billsplitter-monolith/internal/transport/http/auth"
 	mw "billsplitter-monolith/internal/transport/http/middleware"
+	"billsplitter-monolith/internal/transport/http/user"
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
 	"github.com/go-chi/cors"
@@ -20,6 +21,7 @@ import (
 
 type Server struct {
 	authCtrl auth.Controller
+	userCtrl user.Controller
 	mw       mw.Manager
 
 	httpSrv *http.Server
@@ -29,10 +31,12 @@ type Server struct {
 func NewServer(
 	mw mw.Manager,
 	authCtrl auth.Controller,
+	userCtrl user.Controller,
 	logger *slog.Logger,
 ) *Server {
 	return &Server{
 		authCtrl: authCtrl,
+		userCtrl: userCtrl,
 		logger:   logger,
 		mw:       mw,
 	}
@@ -62,6 +66,7 @@ func (s *Server) Start(_ context.Context, cfg cfg.Http) error {
 
 	// init routes
 	auth.InitRoutes(r, s.authCtrl, s.mw)
+	user.InitRoutes(r, s.userCtrl, s.mw)
 
 	s.httpSrv = &http.Server{
 		Addr:              cfg.Port,

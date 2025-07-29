@@ -78,9 +78,15 @@ func (s *RepositoryImpl) GetByID(ctx context.Context, id int64) (*domain.User, e
 func (s *RepositoryImpl) Update(ctx context.Context, id int64, user domain.User) error {
 	errWrap := getErrWrapper("Update")
 
-	e := fromDomain(&user)
-
-	err := s.db.WithContext(ctx).Where("id = ?", id).Save(e).Error
+	err := s.db.
+		WithContext(ctx).
+		Model(&userEntity{}).
+		Where("id = ?", id).
+		Updates(map[string]any{
+			"username":   user.Username,
+			"first_name": user.FirstName,
+			"last_name":  user.LastName,
+		}).Error
 	if err != nil {
 		return errWrap(err)
 	}
