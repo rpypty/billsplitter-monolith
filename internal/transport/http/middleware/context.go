@@ -3,14 +3,14 @@ package middleware
 import (
 	"context"
 
-	"billsplitter-monolith/internal/domain/auth"
+	"billsplitter-monolith/internal/domain/session"
 	"billsplitter-monolith/internal/errors"
 )
 
 type ctxKey string
 
-func UserFromContext(ctx context.Context) (*auth.User, error) {
-	u, ok := ctx.Value(userContextKey).(*auth.User)
+func SessionFromContext(ctx context.Context) (*session.Session, error) {
+	u, ok := ctx.Value(sessionContextKey).(*session.Session)
 	if !ok {
 		return nil, errors.ErrFailedToGetUserFromCtx
 	}

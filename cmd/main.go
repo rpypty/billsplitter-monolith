@@ -14,12 +14,15 @@ import (
 	"gorm.io/gorm/logger"
 
 	"billsplitter-monolith/internal/cfg"
-	authsvc "billsplitter-monolith/internal/domain/auth/impl"
-	sessionstorage "billsplitter-monolith/internal/repository/storage/session"
-	userstorage "billsplitter-monolith/internal/repository/storage/user"
+	sessionimpl "billsplitter-monolith/internal/domain/session/impl"
+	userimpl "billsplitter-monolith/internal/domain/user/impl"
+	sessionrepo "billsplitter-monolith/internal/infrastructure/postgres/session"
+	userrepo "billsplitter-monolith/internal/infrastructure/postgres/user"
 	"billsplitter-monolith/internal/transport/http"
 	authhttp "billsplitter-monolith/internal/transport/http/auth"
 	"billsplitter-monolith/internal/transport/http/middleware"
+	userhttp "billsplitter-monolith/internal/transport/http/user"
+	useruc "billsplitter-monolith/internal/usecase/user"
 	"billsplitter-monolith/internal/utils"
 )
 
@@ -43,17 +46,21 @@ func main() {
 	db := mustInitGormDB(l, appCfg.Storage.Postgres)
 
 	// init storages
-	userStorage := userstorage.NewStorage(db)
-	sessionCache := sessionstorage.NewMemCache()
-	sessionStorage := sessionstorage.NewStorage(db, sessionCache)
+	userRepo := userrepo.NewRepository(db)
+	sessionRepo := sessionrepo.New(db)
 
 	// init service
-	authSvc := authsvc.New(userStorage, sessionStorage, l)
+	sessionSvc := sessionimpl.New(sessionRepo, l)
+	userSvc := userimpl.New(userRepo)
+
+	// init use case
+	userUC := useruc.New(userSvc, sessionSvc)
 
 	// init http server
-	mw := middleware.NewMiddlewareManager(authSvc, l)
-	authCtrl := authhttp.NewController(authSvc, l)
-	httpServer := http.NewServer(mw, authCtrl, l)
+	mw := middleware.NewMiddlewareManager(sessionSvc, l)
+	authCtrl := authhttp.NewController(userUC, userSvc, sessionSvc, l)
+	userCtrl := userhttp.NewController(userSvc, l)
+	httpServer := http.NewServer(mw, authCtrl, userCtrl, l)
 
 	go func() {
 		err := httpServer.Start(ctx, appCfg.Server.Http)

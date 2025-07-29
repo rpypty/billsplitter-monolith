@@ -10,12 +10,12 @@ import (
 )
 
 type middlewareManagerImpl struct {
-	userGetter UserGetterSvc
+	userGetter SessionGetterSvc
 
 	logger *slog.Logger
 }
 
-func NewMiddlewareManager(getter UserGetterSvc, logger *slog.Logger) Manager {
+func NewMiddlewareManager(getter SessionGetterSvc, logger *slog.Logger) Manager {
 	return &middlewareManagerImpl{
 		userGetter: getter,
 		logger:     logger,
@@ -33,16 +33,16 @@ func (mw *middlewareManagerImpl) Auth() MWFunc {
 				return
 			}
 
-			user, err := mw.userGetter.GetUserBySessionID(r.Context(), sessionID)
+			sessionInfo, err := mw.userGetter.GetByID(r.Context(), sessionID)
 			if err != nil {
-				l.Error("AuthorizeMiddleware: failed to get user from session", "error", err)
+				l.Error("AuthorizeMiddleware: failed to get session", "error", err)
 
 				if cfg.IsDebug() {
 					// показываем подробную ошибку в дебаг моде
 					hu.RespondErrWithStatusf(
 						w,
 						http.StatusUnauthorized,
-						"AuthorizeMiddleware: failed to get user from session: %s",
+						"AuthorizeMiddleware: failed to get sessoin: %s",
 						err,
 					)
 					return
@@ -52,12 +52,12 @@ func (mw *middlewareManagerImpl) Auth() MWFunc {
 				return
 			}
 
-			if user == nil {
+			if sessionInfo == nil {
 				hu.RespondErrWithStatus(w, http.StatusUnauthorized, Unauthorized)
 				return
 			}
 
-			ctx := context.WithValue(r.Context(), userContextKey, user)
+			ctx := context.WithValue(r.Context(), sessionContextKey, sessionInfo)
 
 			next.ServeHTTP(w, r.WithContext(ctx))
 		})

@@ -1,6 +1,8 @@
 package auth
 
-import "billsplitter-monolith/internal/domain/auth"
+import (
+	"billsplitter-monolith/internal/domain/user"
+)
 
 // LoginTelegramReq содержит данные пользователя, полученные из Telegram
 type LoginTelegramReq struct {
@@ -13,10 +15,10 @@ type LoginTelegramReq struct {
 // LoginTelegramRes содержит sessionID, выданный после успешного входа
 type LoginTelegramRes struct {
 	SessionID string     `json:"sessionID" example:"b42b0a8e-0d1f-4c3d-939f-85fbbdc9be62"`
-	UserInfo  *auth.User `json:"userInfo"`
+	UserInfo  *user.User `json:"userInfo"`
 }
 
 // MeRes содержит данные авторизованного пользователя
 type MeRes struct {
-	User *auth.User `json:"user"`
+	User *user.User `json:"user"`
 }

@@ -5,7 +5,7 @@ import (
 	"sync"
 	"time"
 
-	"billsplitter-monolith/internal/domain/auth"
+	domain "billsplitter-monolith/internal/domain/session"
 )
 
 type Cache struct {
@@ -15,7 +15,7 @@ type Cache struct {
 }
 
 type cacheEntry struct {
-	value    *auth.Session
+	value    *domain.Session
 	expireAt time.Time
 }
 
@@ -25,7 +25,7 @@ func NewMemCache() *Cache {
 	}
 }
 
-func (c *Cache) Set(ctx context.Context, sessionID string, value *auth.Session, ttl time.Duration) error {
+func (c *Cache) Set(ctx context.Context, sessionID string, value *domain.Session, ttl time.Duration) error {
 	c.mu.Lock()
 	defer c.mu.Unlock()
 
@@ -37,7 +37,7 @@ func (c *Cache) Set(ctx context.Context, sessionID string, value *auth.Session, 
 	return nil
 }
 
-func (c *Cache) Get(ctx context.Context, sessionID string) (*auth.Session, error) {
+func (c *Cache) Get(ctx context.Context, sessionID string) (*domain.Session, error) {
 	c.mu.RLock()
 	defer c.mu.RUnlock()
 

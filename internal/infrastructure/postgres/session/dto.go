@@ -3,14 +3,14 @@ package session
 import (
 	"time"
 
-	"billsplitter-monolith/internal/domain/auth"
+	domain "billsplitter-monolith/internal/domain/session"
 	"gorm.io/gorm"
 )
 
 type sessionEntity struct {
 	gorm.Model
 	ID       string     `gorm:"column:id"`
-	UserID   string     `gorm:"column:user_id"`
+	UserID   int64      `gorm:"column:user_id"`
 	ExpireAt *time.Time `gorm:"column:expire_at"`
 }
 
@@ -18,7 +18,7 @@ func (sessionEntity) TableName() string {
 	return "sessions"
 }
 
-func fromDomain(d *auth.Session) *sessionEntity {
+func fromDomain(d *domain.Session) *sessionEntity {
 	if d == nil {
 		return nil
 	}
@@ -30,12 +30,12 @@ func fromDomain(d *auth.Session) *sessionEntity {
 	}
 }
 
-func toDomain(e *sessionEntity) *auth.Session {
+func toDomain(e *sessionEntity) *domain.Session {
 	if e == nil {
 		return nil
 	}
 
-	return &auth.Session{
+	return &domain.Session{
 		ID:       e.ID,
 		UserID:   e.UserID,
 		ExpireAt: e.ExpireAt,

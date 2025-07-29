@@ -4,8 +4,10 @@ import (
 	"log/slog"
 	"net/http"
 
-	"billsplitter-monolith/internal/domain/auth"
+	"billsplitter-monolith/internal/domain/session"
+	"billsplitter-monolith/internal/domain/user"
 	"billsplitter-monolith/internal/transport/http/middleware"
+	useruc "billsplitter-monolith/internal/usecase/user"
 	hu "billsplitter-monolith/internal/utils/http"
 )
 
@@ -18,14 +20,23 @@ type Controller interface {
 }
 
 type controllerImpl struct {
-	svc    auth.Service
-	logger *slog.Logger
+	userUC     useruc.UseCase
+	userSvc    user.Service
+	sessionSvc session.Service
+	logger     *slog.Logger
 }
 
-func NewController(svc auth.Service, logger *slog.Logger) Controller {
+func NewController(
+	userUC useruc.UseCase,
+	userSvc user.Service,
+	sessionSvc session.Service,
+	logger *slog.Logger,
+) Controller {
 	return &controllerImpl{
-		svc:    svc,
-		logger: logger,
+		userUC:     userUC,
+		userSvc:    userSvc,
+		sessionSvc: sessionSvc,
+		logger:     logger,
 	}
 }
 
@@ -50,23 +61,23 @@ func (c *controllerImpl) LoginTelegram(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	user, err := c.svc.CreateOrGetUserByTgID(ctx, rq.TelegramID, &auth.User{
+	userReq := user.User{
 		Username:  rq.Username,
 		FirstName: rq.FirstName,
 		LastName:  rq.LastName,
-		Extra: auth.UserExtra{
+		Extra: user.ExtraInfo{
 			TelegramID: rq.TelegramID,
 		},
-	})
+	}
+
+	userInfo, err := c.userUC.GetByTgIDOrCreate(ctx, userReq)
 	if err != nil {
 		hu.RespondErrWithStatus(w, http.StatusInternalServerError, err.Error())
 		l.Error(err.Error())
 		return
 	}
 
-	sessionID, err := c.svc.CreateSession(ctx, &auth.Session{
-		UserID: user.ID,
-	})
+	sessionID, err := c.sessionSvc.Create(ctx, userInfo.ID)
 	if err != nil {
 		hu.RespondErrWithStatus(w, http.StatusInternalServerError, err.Error())
 		l.Error(err.Error())
@@ -75,7 +86,7 @@ func (c *controllerImpl) LoginTelegram(w http.ResponseWriter, r *http.Request) {
 
 	hu.RespondJson(w, &LoginTelegramRes{
 		SessionID: sessionID,
-		UserInfo:  user,
+		UserInfo:  userInfo,
 	})
 }
 
@@ -91,7 +102,14 @@ func (c *controllerImpl) Me(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 	l := c.l().With("method", "Me")
 
-	user, err := middleware.UserFromContext(ctx)
+	sessionInfo, err := middleware.SessionFromContext(ctx)
+	if err != nil {
+		hu.RespondErrWithStatus(w, http.StatusBadRequest, err.Error())
+		l.Error(err.Error())
+		return
+	}
+
+	userInfo, err := c.userSvc.GetByID(ctx, sessionInfo.UserID)
 	if err != nil {
 		hu.RespondErrWithStatus(w, http.StatusBadRequest, err.Error())
 		l.Error(err.Error())
@@ -99,7 +117,7 @@ func (c *controllerImpl) Me(w http.ResponseWriter, r *http.Request) {
 	}
 
 	hu.RespondJson(w, &MeRes{
-		User: user,
+		User: userInfo,
 	})
 }
 

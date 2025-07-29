@@ -7,6 +7,10 @@ import (
 	"billsplitter-monolith/internal/cfg"
 )
 
+type ResponseOK struct {
+	Message string `json:"message"`
+}
+
 func RespondErrWithStatus(w http.ResponseWriter, status int, msg string) {
 	RespondErrWithStatusf(w, status, msg)
 }
@@ -32,4 +36,8 @@ func RespondJsonWithStatus(w http.ResponseWriter, status int, data any) {
 	w.WriteHeader(status)
 	bytes := MustMarshal(data)
 	_, _ = w.Write(bytes)
+}
+
+func RespondOK(w http.ResponseWriter) {
+	RespondJsonWithStatus(w, http.StatusOK, ResponseOK{Message: "OK"})
 }

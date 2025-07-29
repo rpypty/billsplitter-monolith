@@ -7,15 +7,11 @@ import (
 
 var (
 	ErrSessionNotFound        = errors.New("session not found")
+	ErrUserNotFound           = errors.New("user not found")
 	ErrFailedToGetUserFromCtx = errors.New("failed to get user from context")
+	ErrSessionExpired         = errors.New("session expired")
 
-	ErrUserStorageFunc = func(err error, method string) error {
-		return fmt.Errorf("USER_STORAGE_ERROR->%s(): %w", method, err)
-	}
-	ErrUserServiceFunc = func(err error, method string) error {
-		return fmt.Errorf("USER_SERVICE_ERROR->%s(): %w", method, err)
-	}
-	ErrSessionStorageFunc = func(err error, method string) error {
-		return fmt.Errorf("SESSION_STORAGE_ERROR->%s(): %w", method, err)
+	ErrValidationFunc = func(msg string) error {
+		return fmt.Errorf("validation error: %s", msg)
 	}
 )

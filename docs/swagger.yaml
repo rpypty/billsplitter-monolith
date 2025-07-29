@@ -1,26 +1,31 @@
 basePath: /
 definitions:
-  billsplitter-monolith_internal_domain_auth.User:
+  billsplitter-monolith_internal_domain_user.ExtraInfo:
+    properties:
+      telegram_id:
+        type: integer
+    type: object
+  billsplitter-monolith_internal_domain_user.User:
     properties:
       extra:
-        $ref: '#/definitions/billsplitter-monolith_internal_domain_auth.UserExtra'
+        $ref: '#/definitions/billsplitter-monolith_internal_domain_user.ExtraInfo'
       firstName:
         type: string
       id:
-        type: string
+        type: integer
       lastName:
         type: string
       username:
         type: string
     type: object
-  billsplitter-monolith_internal_domain_auth.UserExtra:
-    properties:
-      telegram_id:
-        type: integer
-    type: object
   billsplitter-monolith_internal_utils_http.ErrorResponse:
     properties:
       errorMessage:
+        type: string
+    type: object
+  billsplitter-monolith_internal_utils_http.ResponseOK:
+    properties:
+      message:
         type: string
     type: object
   internal_transport_http_auth.LoginTelegramReq:
@@ -46,12 +51,24 @@ definitions:
         example: b42b0a8e-0d1f-4c3d-939f-85fbbdc9be62
         type: string
       userInfo:
-        $ref: '#/definitions/billsplitter-monolith_internal_domain_auth.User'
+        $ref: '#/definitions/billsplitter-monolith_internal_domain_user.User'
     type: object
   internal_transport_http_auth.MeRes:
     properties:
       user:
-        $ref: '#/definitions/billsplitter-monolith_internal_domain_auth.User'
+        $ref: '#/definitions/billsplitter-monolith_internal_domain_user.User'
+    type: object
+  internal_transport_http_user.UpdateUserProfileReq:
+    properties:
+      firstName:
+        example: John
+        type: string
+      lastName:
+        example: Doe
+        type: string
+      username:
+        example: johndoe
+        type: string
     type: object
 host: localhost:5001
 info:
@@ -107,6 +124,46 @@ paths:
       summary: Получить данные текущего пользователя
       tags:
       - auth
+  /user/{id}/profile:
+    put:
+      consumes:
+      - application/json
+      description: Обновляет профиль пользователя по переданному ID, если пользователь
+        аутентифицирован и имеет доступ
+      parameters:
+      - description: ID пользователя
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Данные для обновления профиля
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/internal_transport_http_user.UpdateUserProfileReq'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Профиль успешно обновлён
+          schema:
+            $ref: '#/definitions/billsplitter-monolith_internal_utils_http.ResponseOK'
+        "400":
+          description: Некорректный запрос или ошибка сессии
+          schema:
+            $ref: '#/definitions/billsplitter-monolith_internal_utils_http.ErrorResponse'
+        "403":
+          description: Доступ запрещён (несовпадение ID пользователя и сессии)
+          schema:
+            $ref: '#/definitions/billsplitter-monolith_internal_utils_http.ErrorResponse'
+        "500":
+          description: Внутренняя ошибка сервера (в debug режиме — детали)
+          schema:
+            $ref: '#/definitions/billsplitter-monolith_internal_utils_http.ErrorResponse'
+      summary: Обновление профиля пользователя
+      tags:
+      - user
 schemes:
 - http
 swagger: "2.0"
