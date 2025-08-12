@@ -1,16 +1,17 @@
 package bill
 
 import (
-	vo "billsplitter-monolith/internal/domain/valueobject"
 	"context"
+
+	vo "billsplitter-monolith/internal/domain/valueobject"
 )
 
 type Service interface {
 	// Create - создать новый чек в мите
-	Create(ctx context.Context, bill *Bill) (int64, error)
+	Create(ctx context.Context, bill Bill) (int64, error)
 
 	// Update - обновляет поля в чеке
-	Update(ctx context.Context, rq *UpdateBillRq) error
+	Update(ctx context.Context, rq UpdateBillRq) error
 
 	// AddUsers - добавляет юзеров в чек
 	AddUsers(ctx context.Context, billID int64, users []vo.UserID) error

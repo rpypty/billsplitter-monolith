@@ -87,6 +87,58 @@ const docTemplate = `{
                 }
             }
         },
+        "/event": {
+            "post": {
+                "description": "Создает новый мит с участниками",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "meet"
+                ],
+                "summary": "Создает новый мит",
+                "parameters": [
+                    {
+                        "description": "Данные мита",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/internal_transport_http_meet.CreateEventRq"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "ID созданного мита",
+                        "schema": {
+                            "$ref": "#/definitions/billsplitter-monolith_internal_utils_http.ResponseID"
+                        }
+                    },
+                    "400": {
+                        "description": "Ошибка валидации",
+                        "schema": {
+                            "$ref": "#/definitions/billsplitter-monolith_internal_utils_http.ErrorResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Неавторизован",
+                        "schema": {
+                            "$ref": "#/definitions/billsplitter-monolith_internal_utils_http.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Внутренняя ошибка сервера",
+                        "schema": {
+                            "$ref": "#/definitions/billsplitter-monolith_internal_utils_http.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
         "/user/{id}/profile": {
             "put": {
                 "description": "Обновляет профиль пользователя по переданному ID, если пользователь аутентифицирован и имеет доступ",
@@ -184,6 +236,14 @@ const docTemplate = `{
                 }
             }
         },
+        "billsplitter-monolith_internal_utils_http.ResponseID": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "integer"
+                }
+            }
+        },
         "billsplitter-monolith_internal_utils_http.ResponseOK": {
             "type": "object",
             "properties": {
@@ -233,6 +293,23 @@ const docTemplate = `{
             "properties": {
                 "user": {
                     "$ref": "#/definitions/billsplitter-monolith_internal_domain_user.User"
+                }
+            }
+        },
+        "internal_transport_http_meet.CreateEventRq": {
+            "type": "object",
+            "properties": {
+                "date": {
+                    "type": "string"
+                },
+                "members": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "name": {
+                    "type": "string"
                 }
             }
         },

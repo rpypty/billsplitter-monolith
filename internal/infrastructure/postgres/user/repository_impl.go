@@ -6,6 +6,7 @@ import (
 	"fmt"
 
 	domain "billsplitter-monolith/internal/domain/user"
+	vo "billsplitter-monolith/internal/domain/valueobject"
 	"gorm.io/gorm"
 )
 
@@ -58,12 +59,12 @@ func (s *RepositoryImpl) GetByTelegramID(ctx context.Context, telegramID int64) 
 	return toDomain(user), nil
 }
 
-func (s *RepositoryImpl) GetByID(ctx context.Context, id int64) (*domain.User, error) {
+func (s *RepositoryImpl) GetByID(ctx context.Context, id vo.UserID) (*domain.User, error) {
 	errWrap := getErrWrapper("GetByID")
 
 	user := &userEntity{}
 
-	err := s.db.WithContext(ctx).First(&user, "id = ?", id).Error
+	err := s.db.WithContext(ctx).First(&user, "id = ?", int64(id)).Error
 	if err != nil {
 		if stderrors.Is(err, gorm.ErrRecordNotFound) {
 			return nil, nil
@@ -75,13 +76,13 @@ func (s *RepositoryImpl) GetByID(ctx context.Context, id int64) (*domain.User, e
 	return toDomain(user), nil
 }
 
-func (s *RepositoryImpl) Update(ctx context.Context, id int64, user domain.User) error {
+func (s *RepositoryImpl) Update(ctx context.Context, id vo.UserID, user domain.User) error {
 	errWrap := getErrWrapper("Update")
 
 	err := s.db.
 		WithContext(ctx).
 		Model(&userEntity{}).
-		Where("id = ?", id).
+		Where("id = ?", int64(id)).
 		Updates(map[string]any{
 			"username":   user.Username,
 			"first_name": user.FirstName,

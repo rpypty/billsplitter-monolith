@@ -8,7 +8,7 @@ import (
 
 type Service interface {
 	// Create - создает ивент, возвращает айди созданного ивента
-	Create(ctx context.Context, event Event) (int64, error)
+	Create(ctx context.Context, event CreateEventRq) (int64, error)
 
 	// Update - обновляет некоторые поля в ивенте
 	Update(ctx context.Context, rq UpdateEventRq) error
@@ -22,4 +22,10 @@ type Service interface {
 
 	// Delete - удаляет ивент. Используется soft delete (deletedAt поле)
 	Delete(ctx context.Context, billID int64) error
+}
+
+type Repository interface {
+	Create(ctx context.Context, event Event) (int64, error)
+
+	AddMembers(ctx context.Context, eventID int64, members []Member) error
 }

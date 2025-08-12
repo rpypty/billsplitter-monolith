@@ -6,6 +6,7 @@ import (
 	"net/http"
 
 	"billsplitter-monolith/internal/domain/user"
+	vo "billsplitter-monolith/internal/domain/valueobject"
 	"billsplitter-monolith/internal/transport/http/middleware"
 	hu "billsplitter-monolith/internal/utils/http"
 )
@@ -62,7 +63,7 @@ func (c *controllerImpl) UpdateUserProfile(w http.ResponseWriter, r *http.Reques
 		return
 	}
 
-	if sessionInfo.UserID != userId {
+	if sessionInfo.UserID != vo.UserID(userId) {
 		hu.RespondErrWithStatus(w, http.StatusForbidden, "Forbidden")
 		return
 	}
@@ -79,7 +80,7 @@ func (c *controllerImpl) UpdateUserProfile(w http.ResponseWriter, r *http.Reques
 		LastName:  rq.LastName,
 	}
 
-	err = c.userSvc.Update(ctx, userId, userReq)
+	err = c.userSvc.Update(ctx, vo.UserID(userId), userReq)
 	if err != nil {
 		hu.RespondErrWithStatus(w, http.StatusInternalServerError, err.Error())
 		l.Error(fmt.Sprintf("userController.UpdateUserProfile error: %s", err))

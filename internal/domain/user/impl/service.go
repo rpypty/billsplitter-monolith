@@ -6,6 +6,7 @@ import (
 	"fmt"
 
 	domain "billsplitter-monolith/internal/domain/user"
+	vo "billsplitter-monolith/internal/domain/valueobject"
 	"billsplitter-monolith/internal/errors"
 )
 
@@ -32,7 +33,7 @@ func (s *ServiceImpl) Fetch(ctx context.Context, filter domain.FetchFilter) ([]d
 	return users, nil
 }
 
-func (s *ServiceImpl) GetByID(ctx context.Context, id int64) (*domain.User, error) {
+func (s *ServiceImpl) GetByID(ctx context.Context, id vo.UserID) (*domain.User, error) {
 	errWrap := getErrWrapperFunc("GetById")
 
 	// TODO: add cache layer
@@ -93,7 +94,7 @@ func (s *ServiceImpl) Create(ctx context.Context, user domain.User) (*domain.Use
 	return created, nil
 }
 
-func (s *ServiceImpl) Update(ctx context.Context, id int64, user domain.User) error {
+func (s *ServiceImpl) Update(ctx context.Context, id vo.UserID, user domain.User) error {
 	errWrap := getErrWrapperFunc("Update")
 
 	err := validateUser(user)

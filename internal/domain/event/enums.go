@@ -3,7 +3,7 @@ package event
 // Status - event statuses
 type Status string
 
-var AllStatuses = map[Status]struct{}{
+var StatusesList = map[Status]struct{}{
 	StatusDraft:     {},
 	StatusPublished: {},
 	StatusArchived:  {},
@@ -16,14 +16,14 @@ const (
 )
 
 func (s Status) IsValid() bool {
-	_, ok := AllStatuses[s]
+	_, ok := StatusesList[s]
 	return ok
 }
 
 // Type - event types
 type Type string
 
-var AllTypes = map[Type]struct{}{
+var TypesList = map[Type]struct{}{
 	TypeMeet:    {},
 	TypeTracker: {},
 }
@@ -34,6 +34,6 @@ const (
 )
 
 func (t Type) IsValid() bool {
-	_, ok := AllTypes[t]
+	_, ok := TypesList[t]
 	return ok
 }
