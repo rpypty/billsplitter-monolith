@@ -84,6 +84,428 @@
                 }
             }
         },
+        "/payment_methods": {
+            "get": {
+                "description": "Возвращает список всех платежных методов пользователя",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "user"
+                ],
+                "summary": "Получение списка платежных методов",
+                "responses": {
+                    "200": {
+                        "description": "Список платежных методов",
+                        "schema": {
+                            "$ref": "#/definitions/internal_transport_http_user.PaymentMethodsResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Некорректный запрос или ошибка сессии",
+                        "schema": {
+                            "$ref": "#/definitions/billsplitter-monolith_internal_utils_http.ErrorResponse"
+                        }
+                    },
+                    "403": {
+                        "description": "Доступ запрещён (несовпадение ID пользователя и сессии)",
+                        "schema": {
+                            "$ref": "#/definitions/billsplitter-monolith_internal_utils_http.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Внутренняя ошибка сервера",
+                        "schema": {
+                            "$ref": "#/definitions/billsplitter-monolith_internal_utils_http.ErrorResponse"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "description": "Создает новый платежный метод для пользователя",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "user"
+                ],
+                "summary": "Создание платежного метода",
+                "parameters": [
+                    {
+                        "description": "Данные для создания платежного метода",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/internal_transport_http_user.CreatePaymentMethodReq"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Платежный метод успешно создан",
+                        "schema": {
+                            "$ref": "#/definitions/internal_transport_http_user.PaymentMethodResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Некорректный запрос или ошибка сессии",
+                        "schema": {
+                            "$ref": "#/definitions/billsplitter-monolith_internal_utils_http.ErrorResponse"
+                        }
+                    },
+                    "403": {
+                        "description": "Доступ запрещён (несовпадение ID пользователя и сессии)",
+                        "schema": {
+                            "$ref": "#/definitions/billsplitter-monolith_internal_utils_http.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Внутренняя ошибка сервера",
+                        "schema": {
+                            "$ref": "#/definitions/billsplitter-monolith_internal_utils_http.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/payment_methods/{methodId}": {
+            "put": {
+                "description": "Обновляет существующий платежный метод пользователя",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "user"
+                ],
+                "summary": "Обновление платежного метода",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "ID платежного метода",
+                        "name": "methodId",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Данные для обновления платежного метода",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/internal_transport_http_user.UpdatePaymentMethodReq"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Платежный метод успешно обновлён",
+                        "schema": {
+                            "$ref": "#/definitions/billsplitter-monolith_internal_utils_http.ResponseOK"
+                        }
+                    },
+                    "400": {
+                        "description": "Некорректный запрос или ошибка сессии",
+                        "schema": {
+                            "$ref": "#/definitions/billsplitter-monolith_internal_utils_http.ErrorResponse"
+                        }
+                    },
+                    "403": {
+                        "description": "Доступ запрещён (несовпадение ID пользователя и сессии)",
+                        "schema": {
+                            "$ref": "#/definitions/billsplitter-monolith_internal_utils_http.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Внутренняя ошибка сервера",
+                        "schema": {
+                            "$ref": "#/definitions/billsplitter-monolith_internal_utils_http.ErrorResponse"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "description": "Удаляет платежный метод пользователя",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "user"
+                ],
+                "summary": "Удаление платежного метода",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "ID платежного метода",
+                        "name": "methodId",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Платежный метод успешно удалён",
+                        "schema": {
+                            "$ref": "#/definitions/billsplitter-monolith_internal_utils_http.ResponseOK"
+                        }
+                    },
+                    "400": {
+                        "description": "Некорректный запрос или ошибка сессии",
+                        "schema": {
+                            "$ref": "#/definitions/billsplitter-monolith_internal_utils_http.ErrorResponse"
+                        }
+                    },
+                    "403": {
+                        "description": "Доступ запрещён (несовпадение ID пользователя и сессии)",
+                        "schema": {
+                            "$ref": "#/definitions/billsplitter-monolith_internal_utils_http.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Внутренняя ошибка сервера",
+                        "schema": {
+                            "$ref": "#/definitions/billsplitter-monolith_internal_utils_http.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/user/{id}/payment_methods": {
+            "get": {
+                "description": "Возвращает список всех платежных методов пользователя",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "user"
+                ],
+                "summary": "Получение списка платежных методов",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "ID пользователя (опционально, если не указан - берется из сессии)",
+                        "name": "id",
+                        "in": "path"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Список платежных методов",
+                        "schema": {
+                            "$ref": "#/definitions/internal_transport_http_user.PaymentMethodsResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Некорректный запрос или ошибка сессии",
+                        "schema": {
+                            "$ref": "#/definitions/billsplitter-monolith_internal_utils_http.ErrorResponse"
+                        }
+                    },
+                    "403": {
+                        "description": "Доступ запрещён (несовпадение ID пользователя и сессии)",
+                        "schema": {
+                            "$ref": "#/definitions/billsplitter-monolith_internal_utils_http.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Внутренняя ошибка сервера",
+                        "schema": {
+                            "$ref": "#/definitions/billsplitter-monolith_internal_utils_http.ErrorResponse"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "description": "Создает новый платежный метод для пользователя",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "user"
+                ],
+                "summary": "Создание платежного метода",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "ID пользователя (опционально, если не указан - берется из сессии)",
+                        "name": "id",
+                        "in": "path"
+                    },
+                    {
+                        "description": "Данные для создания платежного метода",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/internal_transport_http_user.CreatePaymentMethodReq"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Платежный метод успешно создан",
+                        "schema": {
+                            "$ref": "#/definitions/internal_transport_http_user.PaymentMethodResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Некорректный запрос или ошибка сессии",
+                        "schema": {
+                            "$ref": "#/definitions/billsplitter-monolith_internal_utils_http.ErrorResponse"
+                        }
+                    },
+                    "403": {
+                        "description": "Доступ запрещён (несовпадение ID пользователя и сессии)",
+                        "schema": {
+                            "$ref": "#/definitions/billsplitter-monolith_internal_utils_http.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Внутренняя ошибка сервера",
+                        "schema": {
+                            "$ref": "#/definitions/billsplitter-monolith_internal_utils_http.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/user/{id}/payment_methods/{methodId}": {
+            "put": {
+                "description": "Обновляет существующий платежный метод пользователя",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "user"
+                ],
+                "summary": "Обновление платежного метода",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "ID пользователя (опционально, если не указан - берется из сессии)",
+                        "name": "id",
+                        "in": "path"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "ID платежного метода",
+                        "name": "methodId",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Данные для обновления платежного метода",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/internal_transport_http_user.UpdatePaymentMethodReq"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Платежный метод успешно обновлён",
+                        "schema": {
+                            "$ref": "#/definitions/billsplitter-monolith_internal_utils_http.ResponseOK"
+                        }
+                    },
+                    "400": {
+                        "description": "Некорректный запрос или ошибка сессии",
+                        "schema": {
+                            "$ref": "#/definitions/billsplitter-monolith_internal_utils_http.ErrorResponse"
+                        }
+                    },
+                    "403": {
+                        "description": "Доступ запрещён (несовпадение ID пользователя и сессии)",
+                        "schema": {
+                            "$ref": "#/definitions/billsplitter-monolith_internal_utils_http.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Внутренняя ошибка сервера",
+                        "schema": {
+                            "$ref": "#/definitions/billsplitter-monolith_internal_utils_http.ErrorResponse"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "description": "Удаляет платежный метод пользователя",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "user"
+                ],
+                "summary": "Удаление платежного метода",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "ID пользователя (опционально, если не указан - берется из сессии)",
+                        "name": "id",
+                        "in": "path"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "ID платежного метода",
+                        "name": "methodId",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Платежный метод успешно удалён",
+                        "schema": {
+                            "$ref": "#/definitions/billsplitter-monolith_internal_utils_http.ResponseOK"
+                        }
+                    },
+                    "400": {
+                        "description": "Некорректный запрос или ошибка сессии",
+                        "schema": {
+                            "$ref": "#/definitions/billsplitter-monolith_internal_utils_http.ErrorResponse"
+                        }
+                    },
+                    "403": {
+                        "description": "Доступ запрещён (несовпадение ID пользователя и сессии)",
+                        "schema": {
+                            "$ref": "#/definitions/billsplitter-monolith_internal_utils_http.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Внутренняя ошибка сервера",
+                        "schema": {
+                            "$ref": "#/definitions/billsplitter-monolith_internal_utils_http.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
         "/user/{id}/profile": {
             "put": {
                 "description": "Обновляет профиль пользователя по переданному ID, если пользователь аутентифицирован и имеет доступ",
@@ -163,7 +585,8 @@
                     "type": "string"
                 },
                 "id": {
-                    "type": "integer"
+                    "type": "integer",
+                    "format": "int64"
                 },
                 "lastName": {
                     "type": "string"
@@ -230,6 +653,84 @@
             "properties": {
                 "user": {
                     "$ref": "#/definitions/billsplitter-monolith_internal_domain_user.User"
+                }
+            }
+        },
+        "internal_transport_http_user.CreatePaymentMethodReq": {
+            "type": "object",
+            "required": [
+                "name",
+                "recipient"
+            ],
+            "properties": {
+                "description": {
+                    "type": "string",
+                    "example": "Система быстрых платежей"
+                },
+                "name": {
+                    "type": "string",
+                    "example": "СБП"
+                },
+                "recipient": {
+                    "type": "string",
+                    "example": "+79001234567"
+                }
+            }
+        },
+        "internal_transport_http_user.PaymentMethodResponse": {
+            "type": "object",
+            "properties": {
+                "description": {
+                    "type": "string",
+                    "example": "Система быстрых платежей"
+                },
+                "id": {
+                    "type": "integer",
+                    "example": 1
+                },
+                "name": {
+                    "type": "string",
+                    "example": "СБП"
+                },
+                "recipient": {
+                    "type": "string",
+                    "example": "+79001234567"
+                },
+                "userId": {
+                    "type": "integer",
+                    "example": 123
+                }
+            }
+        },
+        "internal_transport_http_user.PaymentMethodsResponse": {
+            "type": "object",
+            "properties": {
+                "paymentMethods": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/internal_transport_http_user.PaymentMethodResponse"
+                    }
+                }
+            }
+        },
+        "internal_transport_http_user.UpdatePaymentMethodReq": {
+            "type": "object",
+            "required": [
+                "name",
+                "recipient"
+            ],
+            "properties": {
+                "description": {
+                    "type": "string",
+                    "example": "Система быстрых платежей"
+                },
+                "name": {
+                    "type": "string",
+                    "example": "СБП"
+                },
+                "recipient": {
+                    "type": "string",
+                    "example": "+79001234567"
                 }
             }
         },

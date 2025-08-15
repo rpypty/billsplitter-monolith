@@ -12,6 +12,7 @@ definitions:
       firstName:
         type: string
       id:
+        format: int64
         type: integer
       lastName:
         type: string
@@ -57,6 +58,61 @@ definitions:
     properties:
       user:
         $ref: '#/definitions/billsplitter-monolith_internal_domain_user.User'
+    type: object
+  internal_transport_http_user.CreatePaymentMethodReq:
+    properties:
+      description:
+        example: Система быстрых платежей
+        type: string
+      name:
+        example: СБП
+        type: string
+      recipient:
+        example: "+79001234567"
+        type: string
+    required:
+    - name
+    - recipient
+    type: object
+  internal_transport_http_user.PaymentMethodResponse:
+    properties:
+      description:
+        example: Система быстрых платежей
+        type: string
+      id:
+        example: 1
+        type: integer
+      name:
+        example: СБП
+        type: string
+      recipient:
+        example: "+79001234567"
+        type: string
+      userId:
+        example: 123
+        type: integer
+    type: object
+  internal_transport_http_user.PaymentMethodsResponse:
+    properties:
+      paymentMethods:
+        items:
+          $ref: '#/definitions/internal_transport_http_user.PaymentMethodResponse'
+        type: array
+    type: object
+  internal_transport_http_user.UpdatePaymentMethodReq:
+    properties:
+      description:
+        example: Система быстрых платежей
+        type: string
+      name:
+        example: СБП
+        type: string
+      recipient:
+        example: "+79001234567"
+        type: string
+    required:
+    - name
+    - recipient
     type: object
   internal_transport_http_user.UpdateUserProfileReq:
     properties:
@@ -124,6 +180,285 @@ paths:
       summary: Получить данные текущего пользователя
       tags:
       - auth
+  /payment_methods:
+    get:
+      consumes:
+      - application/json
+      description: Возвращает список всех платежных методов пользователя
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Список платежных методов
+          schema:
+            $ref: '#/definitions/internal_transport_http_user.PaymentMethodsResponse'
+        "400":
+          description: Некорректный запрос или ошибка сессии
+          schema:
+            $ref: '#/definitions/billsplitter-monolith_internal_utils_http.ErrorResponse'
+        "403":
+          description: Доступ запрещён (несовпадение ID пользователя и сессии)
+          schema:
+            $ref: '#/definitions/billsplitter-monolith_internal_utils_http.ErrorResponse'
+        "500":
+          description: Внутренняя ошибка сервера
+          schema:
+            $ref: '#/definitions/billsplitter-monolith_internal_utils_http.ErrorResponse'
+      summary: Получение списка платежных методов
+      tags:
+      - user
+    post:
+      consumes:
+      - application/json
+      description: Создает новый платежный метод для пользователя
+      parameters:
+      - description: Данные для создания платежного метода
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/internal_transport_http_user.CreatePaymentMethodReq'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Платежный метод успешно создан
+          schema:
+            $ref: '#/definitions/internal_transport_http_user.PaymentMethodResponse'
+        "400":
+          description: Некорректный запрос или ошибка сессии
+          schema:
+            $ref: '#/definitions/billsplitter-monolith_internal_utils_http.ErrorResponse'
+        "403":
+          description: Доступ запрещён (несовпадение ID пользователя и сессии)
+          schema:
+            $ref: '#/definitions/billsplitter-monolith_internal_utils_http.ErrorResponse'
+        "500":
+          description: Внутренняя ошибка сервера
+          schema:
+            $ref: '#/definitions/billsplitter-monolith_internal_utils_http.ErrorResponse'
+      summary: Создание платежного метода
+      tags:
+      - user
+  /payment_methods/{methodId}:
+    delete:
+      consumes:
+      - application/json
+      description: Удаляет платежный метод пользователя
+      parameters:
+      - description: ID платежного метода
+        in: path
+        name: methodId
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Платежный метод успешно удалён
+          schema:
+            $ref: '#/definitions/billsplitter-monolith_internal_utils_http.ResponseOK'
+        "400":
+          description: Некорректный запрос или ошибка сессии
+          schema:
+            $ref: '#/definitions/billsplitter-monolith_internal_utils_http.ErrorResponse'
+        "403":
+          description: Доступ запрещён (несовпадение ID пользователя и сессии)
+          schema:
+            $ref: '#/definitions/billsplitter-monolith_internal_utils_http.ErrorResponse'
+        "500":
+          description: Внутренняя ошибка сервера
+          schema:
+            $ref: '#/definitions/billsplitter-monolith_internal_utils_http.ErrorResponse'
+      summary: Удаление платежного метода
+      tags:
+      - user
+    put:
+      consumes:
+      - application/json
+      description: Обновляет существующий платежный метод пользователя
+      parameters:
+      - description: ID платежного метода
+        in: path
+        name: methodId
+        required: true
+        type: integer
+      - description: Данные для обновления платежного метода
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/internal_transport_http_user.UpdatePaymentMethodReq'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Платежный метод успешно обновлён
+          schema:
+            $ref: '#/definitions/billsplitter-monolith_internal_utils_http.ResponseOK'
+        "400":
+          description: Некорректный запрос или ошибка сессии
+          schema:
+            $ref: '#/definitions/billsplitter-monolith_internal_utils_http.ErrorResponse'
+        "403":
+          description: Доступ запрещён (несовпадение ID пользователя и сессии)
+          schema:
+            $ref: '#/definitions/billsplitter-monolith_internal_utils_http.ErrorResponse'
+        "500":
+          description: Внутренняя ошибка сервера
+          schema:
+            $ref: '#/definitions/billsplitter-monolith_internal_utils_http.ErrorResponse'
+      summary: Обновление платежного метода
+      tags:
+      - user
+  /user/{id}/payment_methods:
+    get:
+      consumes:
+      - application/json
+      description: Возвращает список всех платежных методов пользователя
+      parameters:
+      - description: ID пользователя (опционально, если не указан - берется из сессии)
+        in: path
+        name: id
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Список платежных методов
+          schema:
+            $ref: '#/definitions/internal_transport_http_user.PaymentMethodsResponse'
+        "400":
+          description: Некорректный запрос или ошибка сессии
+          schema:
+            $ref: '#/definitions/billsplitter-monolith_internal_utils_http.ErrorResponse'
+        "403":
+          description: Доступ запрещён (несовпадение ID пользователя и сессии)
+          schema:
+            $ref: '#/definitions/billsplitter-monolith_internal_utils_http.ErrorResponse'
+        "500":
+          description: Внутренняя ошибка сервера
+          schema:
+            $ref: '#/definitions/billsplitter-monolith_internal_utils_http.ErrorResponse'
+      summary: Получение списка платежных методов
+      tags:
+      - user
+    post:
+      consumes:
+      - application/json
+      description: Создает новый платежный метод для пользователя
+      parameters:
+      - description: ID пользователя (опционально, если не указан - берется из сессии)
+        in: path
+        name: id
+        type: integer
+      - description: Данные для создания платежного метода
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/internal_transport_http_user.CreatePaymentMethodReq'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Платежный метод успешно создан
+          schema:
+            $ref: '#/definitions/internal_transport_http_user.PaymentMethodResponse'
+        "400":
+          description: Некорректный запрос или ошибка сессии
+          schema:
+            $ref: '#/definitions/billsplitter-monolith_internal_utils_http.ErrorResponse'
+        "403":
+          description: Доступ запрещён (несовпадение ID пользователя и сессии)
+          schema:
+            $ref: '#/definitions/billsplitter-monolith_internal_utils_http.ErrorResponse'
+        "500":
+          description: Внутренняя ошибка сервера
+          schema:
+            $ref: '#/definitions/billsplitter-monolith_internal_utils_http.ErrorResponse'
+      summary: Создание платежного метода
+      tags:
+      - user
+  /user/{id}/payment_methods/{methodId}:
+    delete:
+      consumes:
+      - application/json
+      description: Удаляет платежный метод пользователя
+      parameters:
+      - description: ID пользователя (опционально, если не указан - берется из сессии)
+        in: path
+        name: id
+        type: integer
+      - description: ID платежного метода
+        in: path
+        name: methodId
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Платежный метод успешно удалён
+          schema:
+            $ref: '#/definitions/billsplitter-monolith_internal_utils_http.ResponseOK'
+        "400":
+          description: Некорректный запрос или ошибка сессии
+          schema:
+            $ref: '#/definitions/billsplitter-monolith_internal_utils_http.ErrorResponse'
+        "403":
+          description: Доступ запрещён (несовпадение ID пользователя и сессии)
+          schema:
+            $ref: '#/definitions/billsplitter-monolith_internal_utils_http.ErrorResponse'
+        "500":
+          description: Внутренняя ошибка сервера
+          schema:
+            $ref: '#/definitions/billsplitter-monolith_internal_utils_http.ErrorResponse'
+      summary: Удаление платежного метода
+      tags:
+      - user
+    put:
+      consumes:
+      - application/json
+      description: Обновляет существующий платежный метод пользователя
+      parameters:
+      - description: ID пользователя (опционально, если не указан - берется из сессии)
+        in: path
+        name: id
+        type: integer
+      - description: ID платежного метода
+        in: path
+        name: methodId
+        required: true
+        type: integer
+      - description: Данные для обновления платежного метода
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/internal_transport_http_user.UpdatePaymentMethodReq'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Платежный метод успешно обновлён
+          schema:
+            $ref: '#/definitions/billsplitter-monolith_internal_utils_http.ResponseOK'
+        "400":
+          description: Некорректный запрос или ошибка сессии
+          schema:
+            $ref: '#/definitions/billsplitter-monolith_internal_utils_http.ErrorResponse'
+        "403":
+          description: Доступ запрещён (несовпадение ID пользователя и сессии)
+          schema:
+            $ref: '#/definitions/billsplitter-monolith_internal_utils_http.ErrorResponse'
+        "500":
+          description: Внутренняя ошибка сервера
+          schema:
+            $ref: '#/definitions/billsplitter-monolith_internal_utils_http.ErrorResponse'
+      summary: Обновление платежного метода
+      tags:
+      - user
   /user/{id}/profile:
     put:
       consumes:

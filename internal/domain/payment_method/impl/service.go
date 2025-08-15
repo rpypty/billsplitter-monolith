@@ -19,21 +19,17 @@ func New(repo domain.Repository) *ServiceImpl {
 }
 
 func (s *ServiceImpl) FetchByUserID(ctx context.Context, userID int64) ([]domain.PaymentMethod, error) {
-	// TODO implement me
-	return []domain.PaymentMethod{}, nil
+	return s.repo.FetchByUserID(ctx, userID)
 }
 
 func (s *ServiceImpl) Create(ctx context.Context, paymentMethod domain.PaymentMethod) (domain.PaymentMethod, error) {
-	// TODO implement me
-	panic("implement me")
+	return s.repo.Create(ctx, paymentMethod)
 }
 
 func (s *ServiceImpl) Update(ctx context.Context, id int64, paymentMethod domain.PaymentMethod) error {
-	// TODO implement me
-	panic("implement me")
+	return s.repo.Update(ctx, id, paymentMethod)
 }
 
 func (s *ServiceImpl) Delete(ctx context.Context, id int64) error {
-	// TODO implement me
-	panic("implement me")
+	return s.repo.Delete(ctx, id)
 }
