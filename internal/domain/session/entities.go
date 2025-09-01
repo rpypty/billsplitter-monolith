@@ -1,9 +1,13 @@
 package session
 
-import "time"
+import (
+	"time"
+
+	vo "billsplitter-monolith/internal/domain/valueobject"
+)
 
 type Session struct {
 	ID       string
-	UserID   int64
+	UserID   vo.UserID
 	ExpireAt *time.Time
 }

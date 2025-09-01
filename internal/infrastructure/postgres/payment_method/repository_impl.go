@@ -6,6 +6,7 @@ import (
 	"fmt"
 
 	domain "billsplitter-monolith/internal/domain/payment_method"
+	vo "billsplitter-monolith/internal/domain/valueobject"
 	"gorm.io/gorm"
 )
 
@@ -37,7 +38,7 @@ func (r *RepositoryImpl) GetByID(ctx context.Context, id int64) (domain.PaymentM
 	return *toDomain(e), nil
 }
 
-func (r *RepositoryImpl) FetchByUserID(ctx context.Context, userID int64) ([]domain.PaymentMethod, error) {
+func (r *RepositoryImpl) FetchByUserID(ctx context.Context, userID vo.UserID) ([]domain.PaymentMethod, error) {
 	errWrap := getErrWrapper("FetchByUserID")
 
 	var entities []paymentMethodEntity
@@ -102,4 +103,4 @@ func getErrWrapper(method string) func(error) error {
 	return func(err error) error {
 		return fmt.Errorf("PaymentMethodRepositoryImpl->%s: %w", method, err)
 	}
-} 
+}

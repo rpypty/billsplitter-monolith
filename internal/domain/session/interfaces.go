@@ -2,10 +2,12 @@ package session
 
 import (
 	"context"
+
+	vo "billsplitter-monolith/internal/domain/valueobject"
 )
 
 type Service interface {
-	Create(ctx context.Context, userID int64) (string, error)
+	Create(ctx context.Context, userID vo.UserID) (string, error)
 	GetByID(ctx context.Context, sessionID string) (*Session, error)
 }
 

@@ -25,10 +25,10 @@ func InitRoutes(r chi.Router, ctrl Controller, mw middleware.Manager) {
 	r.Route("/payment_methods", func(r chi.Router) {
 		// Routes requiring authentication
 		r.With(mw.Auth()).Group(func(r chi.Router) {
-			r.Get("/", ctrl.GetPaymentMethods)                 // GET /payment_methods
-			r.Post("/", ctrl.CreatePaymentMethod)              // POST /payment_methods
-			r.Put("/{methodId}", ctrl.UpdatePaymentMethod)     // PUT /payment_methods/{methodId}
-			r.Delete("/{methodId}", ctrl.DeletePaymentMethod)  // DELETE /payment_methods/{methodId}
+			r.Get("/", ctrl.GetPaymentMethods)                // GET /payment_methods
+			r.Post("/", ctrl.CreatePaymentMethod)             // POST /payment_methods
+			r.Put("/{methodId}", ctrl.UpdatePaymentMethod)    // PUT /payment_methods/{methodId}
+			r.Delete("/{methodId}", ctrl.DeletePaymentMethod) // DELETE /payment_methods/{methodId}
 		})
 	})
 }

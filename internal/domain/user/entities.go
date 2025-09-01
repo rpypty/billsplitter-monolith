@@ -1,7 +1,9 @@
 package user
 
+import vo "billsplitter-monolith/internal/domain/valueobject"
+
 type User struct {
-	ID        int64
+	ID        vo.UserID
 	Username  string
 	FirstName string
 	LastName  string

@@ -2,6 +2,7 @@ package user
 
 import (
 	domain "billsplitter-monolith/internal/domain/user"
+	vo "billsplitter-monolith/internal/domain/valueobject"
 	"billsplitter-monolith/internal/utils/pg"
 	"github.com/jackc/pgtype"
 	"gorm.io/gorm"
@@ -28,7 +29,7 @@ func fromDomain(d *domain.User) *userEntity {
 	extra, _ := pg.ToJsonb(&d.Extra)
 
 	return &userEntity{
-		ID:        d.ID,
+		ID:        int64(d.ID),
 		Username:  d.Username,
 		FirstName: d.FirstName,
 		LastName:  d.LastName,
@@ -42,7 +43,7 @@ func toDomain(e *userEntity) *domain.User {
 	}
 
 	out := domain.User{
-		ID:        e.ID,
+		ID:        vo.UserID(e.ID),
 		Username:  e.Username,
 		FirstName: e.FirstName,
 		LastName:  e.LastName,

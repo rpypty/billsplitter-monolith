@@ -44,4 +44,4 @@ func toDomain(e *paymentMethodEntity) *domain.PaymentMethod {
 		Description: e.Description,
 		Recipient:   e.Recipient,
 	}
-} 
+}

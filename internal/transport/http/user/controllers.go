@@ -8,6 +8,7 @@ import (
 
 	"billsplitter-monolith/internal/domain/payment_method"
 	"billsplitter-monolith/internal/domain/user"
+	vo "billsplitter-monolith/internal/domain/valueobject"
 	"billsplitter-monolith/internal/transport/http/middleware"
 	hu "billsplitter-monolith/internal/utils/http"
 	"github.com/go-chi/chi/v5"
@@ -72,13 +73,13 @@ func (c *controllerImpl) UpdateUserProfile(w http.ResponseWriter, r *http.Reques
 		return
 	}
 
-	userId, err := hu.GetQueryParamInt(r, "id")
+	userID, err := hu.GetQueryParamInt(r, "id")
 	if err != nil {
 		hu.RespondErrWithStatus(w, http.StatusBadRequest, "invalid query param id")
 		return
 	}
 
-	if sessionInfo.UserID != userId {
+	if sessionInfo.UserID != vo.UserID(userID) {
 		hu.RespondErrWithStatus(w, http.StatusForbidden, "Forbidden")
 		return
 	}
@@ -95,7 +96,7 @@ func (c *controllerImpl) UpdateUserProfile(w http.ResponseWriter, r *http.Reques
 		LastName:  rq.LastName,
 	}
 
-	err = c.userSvc.Update(ctx, userId, userReq)
+	err = c.userSvc.Update(ctx, vo.UserID(userID), userReq)
 	if err != nil {
 		hu.RespondErrWithStatus(w, http.StatusInternalServerError, err.Error())
 		l.Error(fmt.Sprintf("userController.UpdateUserProfile error: %s", err))
@@ -137,7 +138,7 @@ func (c *controllerImpl) GetPaymentMethods(w http.ResponseWriter, r *http.Reques
 			hu.RespondErrWithStatus(w, http.StatusBadRequest, "invalid user id")
 			return
 		}
-		userID = parsedUserID
+		userID = vo.UserID(parsedUserID)
 	}
 
 	// Verify user has access to this user's data
@@ -189,7 +190,7 @@ func (c *controllerImpl) CreatePaymentMethod(w http.ResponseWriter, r *http.Requ
 	l := c.l().With("method", "CreatePaymentMethod")
 
 	// Debug logging for request details
-	l.Info("CreatePaymentMethod request details", 
+	l.Info("CreatePaymentMethod request details",
 		"contentType", r.Header.Get("Content-Type"),
 		"method", r.Method,
 		"url", r.URL.String())
@@ -209,7 +210,7 @@ func (c *controllerImpl) CreatePaymentMethod(w http.ResponseWriter, r *http.Requ
 			hu.RespondErrWithStatus(w, http.StatusBadRequest, "invalid user id")
 			return
 		}
-		userID = parsedUserID
+		userID = vo.UserID(parsedUserID)
 	}
 
 	// Verify user has access to this user's data
@@ -225,9 +226,9 @@ func (c *controllerImpl) CreatePaymentMethod(w http.ResponseWriter, r *http.Requ
 	}
 
 	// Debug logging to see what's received
-	l.Info("CreatePaymentMethod request received", 
-		"name", req.Name, 
-		"description", req.Description, 
+	l.Info("CreatePaymentMethod request received",
+		"name", req.Name,
+		"description", req.Description,
 		"recipient", req.Recipient)
 
 	// Manual validation for required fields
@@ -241,7 +242,7 @@ func (c *controllerImpl) CreatePaymentMethod(w http.ResponseWriter, r *http.Requ
 	}
 
 	paymentMethod := payment_method.PaymentMethod{
-		UserID:      userID,
+		UserID:      int64(userID),
 		Name:        req.Name,
 		Description: req.Description,
 		Recipient:   req.Recipient,
@@ -299,7 +300,7 @@ func (c *controllerImpl) UpdatePaymentMethod(w http.ResponseWriter, r *http.Requ
 			hu.RespondErrWithStatus(w, http.StatusBadRequest, "invalid user id")
 			return
 		}
-		userID = parsedUserID
+		userID = vo.UserID(parsedUserID)
 	}
 
 	methodID, err := strconv.ParseInt(chi.URLParam(r, "methodId"), 10, 64)
@@ -321,7 +322,7 @@ func (c *controllerImpl) UpdatePaymentMethod(w http.ResponseWriter, r *http.Requ
 	}
 
 	paymentMethod := payment_method.PaymentMethod{
-		UserID:      userID,
+		UserID:      int64(userID),
 		Name:        req.Name,
 		Description: req.Description,
 		Recipient:   req.Recipient,
@@ -370,7 +371,7 @@ func (c *controllerImpl) DeletePaymentMethod(w http.ResponseWriter, r *http.Requ
 			hu.RespondErrWithStatus(w, http.StatusBadRequest, "invalid user id")
 			return
 		}
-		userID = parsedUserID
+		userID = vo.UserID(parsedUserID)
 	}
 
 	methodID, err := strconv.ParseInt(chi.URLParam(r, "methodId"), 10, 64)

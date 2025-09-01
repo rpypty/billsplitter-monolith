@@ -87,6 +87,152 @@ const docTemplate = `{
                 }
             }
         },
+        "/meets": {
+            "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "ID юзера берется из сессии",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "meet"
+                ],
+                "summary": "Получение персонального списка ивентов",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/internal_transport_http_meet.Event"
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/billsplitter-monolith_internal_utils_http.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/billsplitter-monolith_internal_utils_http.ErrorResponse"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Создает новый мит с участниками",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "meet"
+                ],
+                "summary": "Создает новый мит",
+                "parameters": [
+                    {
+                        "description": "Данные мита",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/internal_transport_http_meet.CreateEventRq"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "$ref": "#/definitions/billsplitter-monolith_internal_utils_http.ResponseID"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/billsplitter-monolith_internal_utils_http.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/billsplitter-monolith_internal_utils_http.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/meets/{id}": {
+            "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "meet"
+                ],
+                "summary": "Получение инфы по ивенту",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "ID мита",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/internal_transport_http_meet.Event"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/billsplitter-monolith_internal_utils_http.ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/billsplitter-monolith_internal_utils_http.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/billsplitter-monolith_internal_utils_http.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
         "/payment_methods": {
             "get": {
                 "description": "Возвращает список всех платежных методов пользователя",
@@ -588,8 +734,7 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "id": {
-                    "type": "integer",
-                    "format": "int64"
+                    "type": "integer"
                 },
                 "lastName": {
                     "type": "string"
@@ -604,6 +749,14 @@ const docTemplate = `{
             "properties": {
                 "errorMessage": {
                     "type": "string"
+                }
+            }
+        },
+        "billsplitter-monolith_internal_utils_http.ResponseID": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "integer"
                 }
             }
         },
@@ -656,6 +809,72 @@ const docTemplate = `{
             "properties": {
                 "user": {
                     "$ref": "#/definitions/billsplitter-monolith_internal_domain_user.User"
+                }
+            }
+        },
+        "internal_transport_http_meet.CreateEventRq": {
+            "type": "object",
+            "properties": {
+                "date": {
+                    "type": "string"
+                },
+                "members": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "name": {
+                    "type": "string"
+                }
+            }
+        },
+        "internal_transport_http_meet.Event": {
+            "type": "object",
+            "properties": {
+                "ID": {
+                    "type": "integer"
+                },
+                "created_at": {
+                    "type": "string"
+                },
+                "created_by_user_id": {
+                    "type": "integer"
+                },
+                "deleted_at": {
+                    "type": "string"
+                },
+                "event_date": {
+                    "type": "string"
+                },
+                "members": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/internal_transport_http_meet.Member"
+                    }
+                },
+                "name": {
+                    "type": "string"
+                },
+                "status": {
+                    "type": "string"
+                },
+                "type": {
+                    "type": "string"
+                },
+                "updated_at": {
+                    "type": "string"
+                }
+            }
+        },
+        "internal_transport_http_meet.Member": {
+            "type": "object",
+            "properties": {
+                "user_id": {
+                    "type": "integer"
+                },
+                "username": {
+                    "type": "string"
                 }
             }
         },

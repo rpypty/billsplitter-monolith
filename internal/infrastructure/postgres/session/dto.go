@@ -4,6 +4,7 @@ import (
 	"time"
 
 	domain "billsplitter-monolith/internal/domain/session"
+	vo "billsplitter-monolith/internal/domain/valueobject"
 	"gorm.io/gorm"
 )
 
@@ -25,7 +26,7 @@ func fromDomain(d *domain.Session) *sessionEntity {
 
 	return &sessionEntity{
 		ID:       d.ID,
-		UserID:   d.UserID,
+		UserID:   int64(d.UserID),
 		ExpireAt: d.ExpireAt,
 	}
 }
@@ -37,7 +38,7 @@ func toDomain(e *sessionEntity) *domain.Session {
 
 	return &domain.Session{
 		ID:       e.ID,
-		UserID:   e.UserID,
+		UserID:   vo.UserID(e.UserID),
 		ExpireAt: e.ExpireAt,
 	}
 }

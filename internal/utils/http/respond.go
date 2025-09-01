@@ -11,6 +11,10 @@ type ResponseOK struct {
 	Message string `json:"message"`
 }
 
+type ResponseID struct {
+	ID int64 `json:"id"`
+}
+
 func RespondErrWithStatus(w http.ResponseWriter, status int, msg string) {
 	RespondErrWithStatusf(w, status, msg)
 }

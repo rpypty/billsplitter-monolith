@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"billsplitter-monolith/internal/domain/session"
+	vo "billsplitter-monolith/internal/domain/valueobject"
 	"billsplitter-monolith/internal/errors"
 	"billsplitter-monolith/internal/utils"
 )
@@ -51,7 +52,7 @@ func (s *ServiceImpl) GetByID(ctx context.Context, sessionID string) (*session.S
 	return obj, nil
 }
 
-func (s *ServiceImpl) Create(ctx context.Context, userID int64) (string, error) {
+func (s *ServiceImpl) Create(ctx context.Context, userID vo.UserID) (string, error) {
 	errWrap := getErrWrapperFunc("Create")
 
 	if userID == 0 {

@@ -6,6 +6,7 @@ import (
 
 	"billsplitter-monolith/internal/domain/session"
 	"billsplitter-monolith/internal/domain/user"
+	vo "billsplitter-monolith/internal/domain/valueobject"
 	"billsplitter-monolith/internal/errors"
 )
 
@@ -13,7 +14,7 @@ import (
 type UseCase interface {
 	GetBySessionID(ctx context.Context, sessionID string) (*user.User, error)
 
-	// GetOrCreate - атомарно проверяет есть ли пользователь, если нет - создает нового
+	// GetByTgIDOrCreate - атомарно проверяет есть ли пользователь, если нет - создает нового
 	GetByTgIDOrCreate(ctx context.Context, user user.User) (*user.User, error)
 }
 
@@ -62,7 +63,7 @@ func (uc *UseCaseImpl) GetBySessionID(ctx context.Context, sessionID string) (*u
 		return nil, err
 	}
 
-	userInfo, err := uc.userSvc.GetByID(ctx, sessionInfo.UserID)
+	userInfo, err := uc.userSvc.GetByID(ctx, vo.UserID(sessionInfo.UserID))
 	if err != nil {
 		return nil, err
 	}

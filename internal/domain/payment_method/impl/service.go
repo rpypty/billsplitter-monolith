@@ -4,6 +4,7 @@ import (
 	"context"
 
 	domain "billsplitter-monolith/internal/domain/payment_method"
+	vo "billsplitter-monolith/internal/domain/valueobject"
 )
 
 var _ domain.Service = (*ServiceImpl)(nil)
@@ -18,7 +19,7 @@ func New(repo domain.Repository) *ServiceImpl {
 	}
 }
 
-func (s *ServiceImpl) FetchByUserID(ctx context.Context, userID int64) ([]domain.PaymentMethod, error) {
+func (s *ServiceImpl) FetchByUserID(ctx context.Context, userID vo.UserID) ([]domain.PaymentMethod, error) {
 	return s.repo.FetchByUserID(ctx, userID)
 }
 
