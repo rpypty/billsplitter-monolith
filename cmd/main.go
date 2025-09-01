@@ -15,9 +15,11 @@ import (
 
 	"billsplitter-monolith/internal/cfg"
 	eventimpl "billsplitter-monolith/internal/domain/event/impl"
+	paymentmethodimpl "billsplitter-monolith/internal/domain/payment_method/impl"
 	sessionimpl "billsplitter-monolith/internal/domain/session/impl"
 	userimpl "billsplitter-monolith/internal/domain/user/impl"
 	eventrepo "billsplitter-monolith/internal/infrastructure/postgres/event"
+	paymentmethodrepo "billsplitter-monolith/internal/infrastructure/postgres/payment_method"
 	sessionrepo "billsplitter-monolith/internal/infrastructure/postgres/session"
 	userrepo "billsplitter-monolith/internal/infrastructure/postgres/user"
 	"billsplitter-monolith/internal/transport/http"
@@ -51,12 +53,14 @@ func main() {
 
 	// init storages
 	userRepo := userrepo.NewRepository(db)
+	paymentMethodRepo := paymentmethodrepo.New(db)
 	sessionRepo := sessionrepo.NewRepository(db)
 	eventRepo := eventrepo.NewRepository(db)
 
 	// init service
 	sessionSvc := sessionimpl.New(sessionRepo, l)
 	userSvc := userimpl.New(userRepo)
+	paymentMethodSvc := paymentmethodimpl.New(paymentMethodRepo)
 	eventSvc := eventimpl.New(eventRepo)
 
 	// init use case
@@ -66,7 +70,7 @@ func main() {
 	// init http server
 	mw := middleware.NewMiddlewareManager(sessionSvc, l)
 	authCtrl := authhttp.NewController(userUC, userSvc, sessionSvc, l)
-	userCtrl := userhttp.NewController(userSvc, l)
+	userCtrl := userhttp.NewController(userSvc, paymentMethodSvc, l)
 	meetCtrl := meethttp.NewController(meetUC, l)
 	httpServer := http.NewServer(mw, authCtrl, userCtrl, meetCtrl, l)
 
