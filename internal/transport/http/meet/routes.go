@@ -6,8 +6,12 @@ import (
 )
 
 func InitRoutes(r chi.Router, ctrl Controller, mw middleware.Manager) {
-	r.Route("/meet", func(r chi.Router) {
+	r.Route("/meets", func(r chi.Router) {
 		// public routes
 		r.With(mw.Auth()).Post("/", ctrl.CreateMeet)
+
+		r.With(mw.Auth()).Get("/", ctrl.FetchUserMeets)
+
+		r.With(mw.Auth()).Get("/{id}", ctrl.GetMeetDetailsByID)
 	})
 }

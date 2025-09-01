@@ -57,13 +57,13 @@ func (c *controllerImpl) UpdateUserProfile(w http.ResponseWriter, r *http.Reques
 		return
 	}
 
-	userId, err := hu.GetQueryParamInt(r, "id")
+	userID, err := hu.GetQueryParamInt(r, "id")
 	if err != nil {
 		hu.RespondErrWithStatus(w, http.StatusBadRequest, "invalid query param id")
 		return
 	}
 
-	if sessionInfo.UserID != vo.UserID(userId) {
+	if sessionInfo.UserID != vo.UserID(userID) {
 		hu.RespondErrWithStatus(w, http.StatusForbidden, "Forbidden")
 		return
 	}
@@ -80,7 +80,7 @@ func (c *controllerImpl) UpdateUserProfile(w http.ResponseWriter, r *http.Reques
 		LastName:  rq.LastName,
 	}
 
-	err = c.userSvc.Update(ctx, vo.UserID(userId), userReq)
+	err = c.userSvc.Update(ctx, vo.UserID(userID), userReq)
 	if err != nil {
 		hu.RespondErrWithStatus(w, http.StatusInternalServerError, err.Error())
 		l.Error(fmt.Sprintf("userController.UpdateUserProfile error: %s", err))

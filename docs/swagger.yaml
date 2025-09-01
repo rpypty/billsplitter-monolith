@@ -74,6 +74,38 @@ definitions:
       name:
         type: string
     type: object
+  internal_transport_http_meet.Event:
+    properties:
+      ID:
+        type: integer
+      created_at:
+        type: string
+      created_by_user_id:
+        type: integer
+      deleted_at:
+        type: string
+      event_date:
+        type: string
+      members:
+        items:
+          $ref: '#/definitions/internal_transport_http_meet.Member'
+        type: array
+      name:
+        type: string
+      status:
+        type: string
+      type:
+        type: string
+      updated_at:
+        type: string
+    type: object
+  internal_transport_http_meet.Member:
+    properties:
+      user_id:
+        type: integer
+      username:
+        type: string
+    type: object
   internal_transport_http_user.UpdateUserProfileReq:
     properties:
       firstName:
@@ -140,7 +172,33 @@ paths:
       summary: Получить данные текущего пользователя
       tags:
       - auth
-  /event:
+  /meets:
+    get:
+      consumes:
+      - application/json
+      description: ID юзера берется из сессии
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/internal_transport_http_meet.Event'
+            type: array
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/billsplitter-monolith_internal_utils_http.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/billsplitter-monolith_internal_utils_http.ErrorResponse'
+      security:
+      - ApiKeyAuth: []
+      summary: Получение персонального списка ивентов
+      tags:
+      - meet
     post:
       consumes:
       - application/json
@@ -156,22 +214,54 @@ paths:
       - application/json
       responses:
         "201":
-          description: ID созданного мита
+          description: Created
           schema:
             $ref: '#/definitions/billsplitter-monolith_internal_utils_http.ResponseID'
-        "400":
-          description: Ошибка валидации
-          schema:
-            $ref: '#/definitions/billsplitter-monolith_internal_utils_http.ErrorResponse'
         "401":
-          description: Неавторизован
+          description: Unauthorized
           schema:
             $ref: '#/definitions/billsplitter-monolith_internal_utils_http.ErrorResponse'
         "500":
-          description: Внутренняя ошибка сервера
+          description: Internal Server Error
           schema:
             $ref: '#/definitions/billsplitter-monolith_internal_utils_http.ErrorResponse'
+      security:
+      - ApiKeyAuth: []
       summary: Создает новый мит
+      tags:
+      - meet
+  /meets/{id}:
+    get:
+      consumes:
+      - application/json
+      parameters:
+      - description: ID мита
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/internal_transport_http_meet.Event'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/billsplitter-monolith_internal_utils_http.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/billsplitter-monolith_internal_utils_http.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/billsplitter-monolith_internal_utils_http.ErrorResponse'
+      security:
+      - ApiKeyAuth: []
+      summary: Получение инфы по ивенту
       tags:
       - meet
   /user/{id}/profile:

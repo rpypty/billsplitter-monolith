@@ -12,3 +12,10 @@ type CreateMeetRq struct {
 	CreatedByUserID vo.UserID
 	Members         []string
 }
+
+type Event struct {
+	EventName       string
+	Date            *time.Time
+	CreatedByUserID vo.UserID
+	Members         []string
+}

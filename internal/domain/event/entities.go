@@ -24,7 +24,8 @@ type CreateEventRq struct {
 	EventDate *time.Time
 
 	// CreatedBy - пользователя который создает мит - это сразу первый авторизованный пользователь
-	Creator Member
+	CreatorUserID   vo.UserID
+	CreatorUsername string
 
 	// Members - Список участников
 	// Работаем по системе "пикми" - при создании мита добавляем плейсхолдеры пользователей - просто имена.
@@ -35,14 +36,14 @@ type CreateEventRq struct {
 }
 
 type Event struct {
-	ID        int64
-	Name      string
-	Members   []Member // Members - участников, обогощаются на уровне UseCase
-	CreatedBy Member
-	Status    Status
-	Type      Type
-	CreatedAt time.Time
-	UpdatedAt time.Time
-	EventDate *time.Time
-	DeletedAt *time.Time
+	ID              int64
+	Name            string
+	CreatedByUserID vo.UserID
+	Members         []Member // Members - участников, обогощаются на уровне UseCase
+	Status          Status
+	Type            Type
+	CreatedAt       time.Time
+	UpdatedAt       time.Time
+	EventDate       *time.Time
+	DeletedAt       *time.Time
 }

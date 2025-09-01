@@ -5,6 +5,7 @@ import (
 	"fmt"
 
 	domain "billsplitter-monolith/internal/domain/event"
+	vo "billsplitter-monolith/internal/domain/valueobject"
 	"gorm.io/gorm"
 )
 
@@ -54,4 +55,38 @@ func getErrWrapper(method string) func(error) error {
 	return func(err error) error {
 		return fmt.Errorf("EventRepositoryIpml->%s: %w", method, err)
 	}
+}
+
+func (r *RepositoryImpl) FetchByUserID(ctx context.Context, userID vo.UserID) ([]domain.Event, error) {
+	entityEvents := make([]eventEntity, 0)
+
+	err := r.db.
+		WithContext(ctx).
+		Preload("Members").
+		Find(&entityEvents, "created_by_user_id = ?", int64(userID)).Error
+	if err != nil {
+		return nil, err
+	}
+
+	domainEvents := make([]domain.Event, 0, len(entityEvents))
+
+	for _, ev := range entityEvents {
+		domainEvents = append(domainEvents, *eventToDomain(&ev))
+	}
+
+	return domainEvents, nil
+}
+
+func (r *RepositoryImpl) GetByID(ctx context.Context, eventID int64) (*domain.Event, error) {
+	entityEvent := &eventEntity{}
+
+	err := r.db.
+		WithContext(ctx).
+		Preload("Members").
+		Find(&entityEvent, "event_id = ?", eventID).Error
+	if err != nil {
+		return nil, err
+	}
+
+	return eventToDomain(entityEvent), nil
 }

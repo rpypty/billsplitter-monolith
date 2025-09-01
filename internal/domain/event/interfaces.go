@@ -22,10 +22,18 @@ type Service interface {
 
 	// Delete - удаляет ивент. Используется soft delete (deletedAt поле)
 	Delete(ctx context.Context, billID int64) error
+
+	FetchByUserID(ctx context.Context, userID vo.UserID) ([]Event, error)
+
+	GetByID(ctx context.Context, eventID int64) (*Event, error)
 }
 
 type Repository interface {
 	Create(ctx context.Context, event Event) (int64, error)
 
 	AddMembers(ctx context.Context, eventID int64, members []Member) error
+
+	FetchByUserID(ctx context.Context, userID vo.UserID) ([]Event, error)
+
+	GetByID(ctx context.Context, eventID int64) (*Event, error)
 }

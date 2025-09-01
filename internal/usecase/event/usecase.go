@@ -8,11 +8,12 @@ import (
 	"billsplitter-monolith/internal/domain/user"
 	vo "billsplitter-monolith/internal/domain/valueobject"
 	"billsplitter-monolith/internal/errors"
-	"billsplitter-monolith/internal/utils"
 )
 
 type UseCase interface {
 	CreateMeet(ctx context.Context, rq CreateMeetRq) (int64, error)
+	FetchUserMeets(ctx context.Context, userID vo.UserID) ([]event.Event, error)
+	GetMeetByID(ctx context.Context, meetID int64) (*event.Event, error)
 }
 
 type UseCaseImpl struct {
@@ -31,25 +32,43 @@ func New(
 }
 
 func (uc *UseCaseImpl) CreateMeet(ctx context.Context, rq CreateMeetRq) (int64, error) {
-	creator, err := uc.userSvc.GetByID(ctx, rq.CreatedByUserID)
+	creatorUser, err := uc.userSvc.GetByID(ctx, rq.CreatedByUserID)
 	if err != nil {
 		return 0, err
 	}
 
-	if creator == nil {
+	if creatorUser == nil {
 		return 0, fmt.Errorf("get event creator error: %w", errors.ErrUserNotFound)
 	}
 
 	meetID, err := uc.eventSvc.Create(ctx, event.CreateEventRq{
-		Name:      rq.EventName,
-		EventDate: rq.Date,
-		Creator: event.Member{
-			// сразу привязываем userID для создателя мита
-			UserID: utils.Ptr(vo.UserID(creator.ID)),
-			Name:   creator.Username,
-		},
-		Members: rq.Members,
+		Name:            rq.EventName,
+		EventDate:       rq.Date,
+		CreatorUserID:   creatorUser.ID,
+		CreatorUsername: creatorUser.Username,
+		Members:         rq.Members,
 	})
+	if err != nil {
+		return 0, err
+	}
 
 	return meetID, nil
+}
+
+func (uc *UseCaseImpl) FetchUserMeets(ctx context.Context, userID vo.UserID) ([]event.Event, error) {
+	events, err := uc.eventSvc.FetchByUserID(ctx, userID)
+	if err != nil {
+		return nil, err
+	}
+
+	return events, nil
+}
+
+func (uc *UseCaseImpl) GetMeetByID(ctx context.Context, meetID int64) (*event.Event, error) {
+	events, err := uc.eventSvc.GetByID(ctx, meetID)
+	if err != nil {
+		return nil, err
+	}
+
+	return events, nil
 }

@@ -1,6 +1,6 @@
 -- +goose Up
 -- +goose StatementBegin
-CREATE TABLE event (
+CREATE TABLE events (
     id                 SERIAL        PRIMARY KEY,
     name               TEXT,
     created_by_user_id INT,
@@ -12,7 +12,7 @@ CREATE TABLE event (
     deleted_at         TIMESTAMPTZ
 );
 
-CREATE TABLE member (
+CREATE TABLE members (
     id          SERIAL PRIMARY KEY,
     user_id     INT,
     event_id    INT,
@@ -22,6 +22,6 @@ CREATE TABLE member (
 
 -- +goose Down
 -- +goose StatementBegin
-DROP TABLE event;
-DROP TABLE member;
+DROP TABLE events;
+DROP TABLE membesr;
 -- +goose StatementEnd

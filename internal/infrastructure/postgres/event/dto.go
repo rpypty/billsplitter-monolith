@@ -24,10 +24,12 @@ type eventEntity struct {
 	UpdatedAt       time.Time  `gorm:"column:updated_at"`
 	DeletedAt       *time.Time `gorm:"column:deleted_at"`
 	EventDate       *time.Time `gorm:"column:event_date"`
+
+	Members []memberEntity `gorm:"foreignKey:EventID;references:ID"`
 }
 
 func (eventEntity) TableName() string {
-	return "event"
+	return "events"
 }
 
 func eventFromDomain(d *domain.Event) *eventEntity {
@@ -40,7 +42,7 @@ func eventFromDomain(d *domain.Event) *eventEntity {
 		Name:            d.Name,
 		EventType:       string(d.Type),
 		Status:          string(d.Status),
-		CreatedByUserID: int64(utils.SafeDereference(d.CreatedBy.UserID)),
+		CreatedByUserID: int64(d.CreatedByUserID),
 		CreatedAt:       d.CreatedAt,
 		UpdatedAt:       d.UpdatedAt,
 		DeletedAt:       d.DeletedAt,
@@ -48,22 +50,28 @@ func eventFromDomain(d *domain.Event) *eventEntity {
 	}
 }
 
-func eventToDomain(e *eventEntity, createdBy domain.Member, members []domain.Member) *domain.Event {
+func eventToDomain(e *eventEntity) *domain.Event {
 	if e == nil {
 		return nil
 	}
 
+	domainMembers := make([]domain.Member, 0, len(e.Members))
+
+	for _, member := range e.Members {
+		domainMembers = append(domainMembers, *memberToDomain(&member))
+	}
+
 	out := domain.Event{
-		ID:        e.ID,
-		Name:      e.Name,
-		Members:   members,
-		CreatedBy: createdBy,
-		Status:    domain.Status(e.Status),
-		Type:      domain.Type(e.EventType),
-		CreatedAt: e.CreatedAt,
-		UpdatedAt: e.UpdatedAt,
-		EventDate: e.EventDate,
-		DeletedAt: e.DeletedAt,
+		ID:              e.ID,
+		Name:            e.Name,
+		Members:         domainMembers,
+		CreatedByUserID: vo.UserID(e.CreatedByUserID),
+		Status:          domain.Status(e.Status),
+		Type:            domain.Type(e.EventType),
+		CreatedAt:       e.CreatedAt,
+		UpdatedAt:       e.UpdatedAt,
+		EventDate:       e.EventDate,
+		DeletedAt:       e.DeletedAt,
 	}
 
 	return &out
@@ -74,15 +82,14 @@ func eventToDomain(e *eventEntity, createdBy domain.Member, members []domain.Mem
 //
 
 type memberEntity struct {
-	gorm.Model
 	ID      int64  `gorm:"column:id"`
-	Name    string `gorm:"column:name"`
+	Name    string `gorm:"column:member_name"`
 	EventID int64  `gorm:"column:event_id"`
 	UserID  *int64 `gorm:"column:user_id"`
 }
 
 func (memberEntity) TableName() string {
-	return "member"
+	return "members"
 }
 
 func memberFromDomain(eventID int64, d *domain.Member) *memberEntity {

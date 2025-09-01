@@ -23,11 +23,11 @@ func (s *ServiceImpl) Create(ctx context.Context, rq event.CreateEventRq) (int64
 	// TODO: add pg transaction
 
 	billID, err := s.repo.Create(ctx, event.Event{
-		Name:      rq.Name,
-		CreatedBy: rq.Creator,
-		Status:    event.StatusDraft,
-		Type:      event.TypeMeet,
-		EventDate: rq.EventDate,
+		Name:            rq.Name,
+		CreatedByUserID: rq.CreatorUserID,
+		Status:          event.StatusDraft,
+		Type:            event.TypeMeet,
+		EventDate:       rq.EventDate,
 	})
 	if err != nil {
 		return 0, err
@@ -36,7 +36,10 @@ func (s *ServiceImpl) Create(ctx context.Context, rq event.CreateEventRq) (int64
 	// +1 чтобы добавить создателя
 	members := make([]event.Member, 0, len(rq.Members)+1)
 
-	members = append(members, rq.Creator)
+	members = append(members, event.Member{
+		UserID: &rq.CreatorUserID,
+		Name:   rq.CreatorUsername,
+	})
 
 	for _, memberName := range rq.Members {
 		members = append(members, event.Member{
@@ -50,7 +53,7 @@ func (s *ServiceImpl) Create(ctx context.Context, rq event.CreateEventRq) (int64
 		return 0, err
 	}
 
-	return 0, nil
+	return billID, nil
 }
 
 func (s *ServiceImpl) Update(ctx context.Context, rq event.UpdateEventRq) error {
@@ -71,4 +74,12 @@ func (s *ServiceImpl) RemoveUsers(ctx context.Context, eventID int64, userID []v
 func (s *ServiceImpl) Delete(ctx context.Context, billID int64) error {
 	// TODO implement me
 	panic("implement me")
+}
+
+func (s *ServiceImpl) FetchByUserID(ctx context.Context, userID vo.UserID) ([]event.Event, error) {
+	return s.repo.FetchByUserID(ctx, userID)
+}
+
+func (s *ServiceImpl) GetByID(ctx context.Context, billID int64) (*event.Event, error) {
+	return s.repo.GetByID(ctx, billID)
 }
