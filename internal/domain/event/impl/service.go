@@ -33,7 +33,7 @@ func (s *ServiceImpl) Create(ctx context.Context, rq event.CreateEventRq) (int64
 		return 0, err
 	}
 
-	// +1 чтобы добавить создателя
+	// +1 чтобы добавить капасити для создателя ивента
 	members := make([]event.Member, 0, len(rq.Members)+1)
 
 	members = append(members, event.Member{

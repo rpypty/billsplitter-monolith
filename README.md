@@ -23,7 +23,7 @@ psql -h localhost -p 55433 -U admin -d bill_splitter
 
 #### 1. Установка мигратора
 ```bash
-go install github.com/pressly/goose/v3/cmd/goose@latest
+GOPROXY=direct go install github.com/pressly/goose/v3/cmd/goose@latest
 ```
 
 #### 2. Создании файла миграции 

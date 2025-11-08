@@ -1,0 +1,98 @@
+{
+    "workbench.colorTheme": "Default Dark+",
+    "workbench.tree.indent": 14,
+    "workbench.tree.expandMode": "doubleClick",
+    "workbench.tree.renderIndentGuides": "none",
+    "explorer.sortOrder": "type",
+    "workbench.editor.enablePreview": false,
+    "workbench.list.openMode": "doubleClick",
+    "explorer.compactFolders": false,
+    // Goland->Dark:
+    // "workbench.colorTheme": "Default Dark+",
+    "editor.tokenColorCustomizations": {
+      "textMateRules": [
+        {
+          "scope": "keyword",
+          "settings": {
+            "foreground": "#CF8E6D" // мягкий оранжево-коричневый
+          }
+        },
+        {
+          "scope": "keyword.control",
+          "settings": {
+            "foreground": "#CF8E6D" // мягкий оранжево-коричневый
+          }
+        },
+        {
+          "scope": "storage.type",
+          "settings": {
+            "foreground": "#CF8E6D" // 
+          }
+        },
+        {
+          "scope": "entity.name.function",
+          "settings": {
+            "foreground": "#51b0fd" // main тёплый песочный
+          }
+        },
+        {
+          "scope": "entity.name.type",
+          "settings": {
+            "foreground": "#78bac8" // мягкий бирюзовый
+          }
+        },
+        {
+          "scope": "variable",
+          "settings": {
+            "foreground": "#cfcece" // серо-белый
+          }
+        },
+        {
+          "scope": "string",
+          "settings": {
+            "foreground": "#80ac7b" // мягкий зелёный
+          }
+        },
+        {
+          "scope": "constant.numeric",
+          "settings": {
+            "foreground": "#a3b8ef" // мягкий голубой
+          }
+        },
+        {
+          "scope": "comment",
+          "settings": {
+            "foreground": "#6a6a6a",
+            "fontStyle": "italic"
+          }
+        },
+        {
+          "scope": "punctuation",
+          "settings": {
+            "foreground": "#b0b0b0"
+          }
+        },
+        {
+          "scope": "support.type.builtin",
+          "settings": {
+            "foreground": "#d28c36"
+          }
+        }
+      ]
+    },
+    // скобки
+    "editor.bracketPairColorization.enabled": false,
+    "workbench.colorCustomizations": {
+      "editorBracketHighlight.foreground1": "#ffd700",
+      "editor.background": "#1E1F22",
+      "editor.foreground": "#ffffff",
+      "sideBar.background": "#2B2D30",
+      "sideBar.foreground": "#DFE1E5",
+      "activityBar.background": "#2B2D30",
+      "tab.activeBackground": "#252627",
+      "tab.inactiveBackground": "#1E1F22",
+      "list.activeSelectionBackground": "#2E436E",
+      "list.focusAndSelectionOutline": "#00000000"
+    },
+    "material-icon-theme.folders.theme": "classic"
+  }

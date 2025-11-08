@@ -1,0 +1,55 @@
+filename: mock_{{.InterfaceName}}.go
+
+packages:
+  billsplitter-monolith/internal/domain/session:
+    config:
+      dir: internal/mocks/domain/session
+      pkgname: sessionmock
+    interfaces:
+      Service: {}
+      Repository: {}
+
+  billsplitter-monolith/internal/domain/event:
+    config:
+      dir: internal/mocks/domain/event
+      pkgname: eventmock
+    interfaces:
+      Service: {}
+      Repository: {}
+
+  billsplitter-monolith/internal/domain/payment_method:
+    config:
+      dir: internal/mocks/domain/payment_method
+      pkgname: paymentmethodmock
+    interfaces:
+      Service: {}
+      Repository: {}
+
+  billsplitter-monolith/internal/domain/user:
+    config:
+      dir: internal/mocks/domain/user
+      pkgname: usermock
+    interfaces:
+      Service: {}
+      Repository: {}
+
+  billsplitter-monolith/internal/domain/bill:
+    config:
+      dir: internal/mocks/domain/bill
+      pkgname: billmock
+    interfaces:
+      Service: {}
+
+  billsplitter-monolith/internal/usecase/event:
+    config:
+      dir: internal/mocks/usecase/event
+      pkgname: eventusecasemock
+    interfaces:
+      UseCase: {}
+
+  billsplitter-monolith/internal/usecase/user:
+    config:
+      dir: internal/mocks/usecase/user
+      pkgname: userusecasemock
+    interfaces:
+      UseCase: {}
