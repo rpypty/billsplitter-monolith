@@ -11,6 +11,7 @@ type CreateEventRq struct {
 }
 
 type Member struct {
+	ID       int64  `json:"ID"`
 	UserID   *int64 `json:"user_id"`
 	Username string `json:"username"`
 }

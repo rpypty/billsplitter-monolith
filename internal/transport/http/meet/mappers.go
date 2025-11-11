@@ -10,6 +10,7 @@ func fromDomainEvent(meet domain.Event) Event {
 
 	for _, member := range meet.Members {
 		outMembers = append(outMembers, Member{
+			ID:       member.ID,
 			UserID:   utils.UserIDToInt64(member.UserID),
 			Username: member.Name,
 		})

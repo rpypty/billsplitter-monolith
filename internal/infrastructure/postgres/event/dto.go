@@ -6,6 +6,7 @@ import (
 	domain "billsplitter-monolith/internal/domain/event"
 	vo "billsplitter-monolith/internal/domain/valueobject"
 	"billsplitter-monolith/internal/utils"
+
 	"gorm.io/gorm"
 )
 
@@ -116,8 +117,9 @@ func memberToDomain(e *memberEntity) *domain.Member {
 	}
 
 	out := domain.Member{
-		ID:   e.ID,
-		Name: e.Name,
+		ID:     e.ID,
+		UserID: (*vo.UserID)(e.UserID),
+		Name:   e.Name,
 	}
 
 	if e.UserID != nil {
