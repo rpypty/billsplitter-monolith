@@ -6,6 +6,7 @@ import (
 
 	domain "billsplitter-monolith/internal/domain/event"
 	vo "billsplitter-monolith/internal/domain/valueobject"
+
 	"gorm.io/gorm"
 )
 
@@ -63,7 +64,9 @@ func (r *RepositoryImpl) FetchByUserID(ctx context.Context, userID vo.UserID) ([
 	err := r.db.
 		WithContext(ctx).
 		Preload("Members").
-		Find(&entityEvents, "created_by_user_id = ?", int64(userID)).Error
+		Order("created_at DESC").
+		Find(&entityEvents, "created_by_user_id = ?", int64(userID)).
+		Error
 	if err != nil {
 		return nil, err
 	}
