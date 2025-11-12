@@ -4,8 +4,6 @@ import (
 	"bytes"
 	"encoding/json"
 	"errors"
-	"io"
-	"log/slog"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -16,7 +14,7 @@ import (
 	sessionmock "billsplitter-monolith/internal/mocks/domain/session"
 	usermock "billsplitter-monolith/internal/mocks/domain/user"
 	userucmock "billsplitter-monolith/internal/mocks/usecase/user"
-	"billsplitter-monolith/internal/transport/http/middleware"
+	"billsplitter-monolith/internal/utils/testkit"
 
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
@@ -27,7 +25,7 @@ func TestController_LoginTelegram(t *testing.T) {
 		userUC := userucmock.NewMockUseCase(t)
 		userSvc := usermock.NewMockService(t)
 		sessionSvc := sessionmock.NewMockService(t)
-		ctrl := NewController(userUC, userSvc, sessionSvc, newTestLogger())
+		ctrl := NewController(userUC, userSvc, sessionSvc, testkit.NewTestLogger())
 
 		body := bytes.NewBufferString(`{"username":"nick","firstName":"Nick","lastName":"Doe","telegramID":123}`)
 		req := httptest.NewRequest(http.MethodPost, "/auth/login/telegram", body)
@@ -57,7 +55,7 @@ func TestController_LoginTelegram(t *testing.T) {
 	t.Run("invalid payload", func(t *testing.T) {
 		userUC := userucmock.NewMockUseCase(t)
 		sessionSvc := sessionmock.NewMockService(t)
-		ctrl := NewController(userUC, nil, sessionSvc, newTestLogger())
+		ctrl := NewController(userUC, nil, sessionSvc, testkit.NewTestLogger())
 
 		body := bytes.NewBufferString(`{"username":"nick"}`)
 		req := httptest.NewRequest(http.MethodPost, "/auth/login/telegram", body)
@@ -71,7 +69,7 @@ func TestController_LoginTelegram(t *testing.T) {
 	t.Run("user usecase error", func(t *testing.T) {
 		userUC := userucmock.NewMockUseCase(t)
 		sessionSvc := sessionmock.NewMockService(t)
-		ctrl := NewController(userUC, nil, sessionSvc, newTestLogger())
+		ctrl := NewController(userUC, nil, sessionSvc, testkit.NewTestLogger())
 		req := httptest.NewRequest(http.MethodPost, "/", bytes.NewBufferString(`{"username":"nick","telegramID":1}`))
 		rec := httptest.NewRecorder()
 
@@ -87,7 +85,7 @@ func TestController_LoginTelegram(t *testing.T) {
 	t.Run("session create error", func(t *testing.T) {
 		userUC := userucmock.NewMockUseCase(t)
 		sessionSvc := sessionmock.NewMockService(t)
-		ctrl := NewController(userUC, nil, sessionSvc, newTestLogger())
+		ctrl := NewController(userUC, nil, sessionSvc, testkit.NewTestLogger())
 		req := httptest.NewRequest(http.MethodPost, "/", bytes.NewBufferString(`{"username":"nick","telegramID":1}`))
 		rec := httptest.NewRecorder()
 
@@ -110,10 +108,10 @@ func TestController_Me(t *testing.T) {
 	t.Run("success", func(t *testing.T) {
 		userSvc := usermock.NewMockService(t)
 		sessionSvc := sessionmock.NewMockService(t)
-		ctrl := NewController(nil, userSvc, sessionSvc, newTestLogger())
+		ctrl := NewController(nil, userSvc, sessionSvc, testkit.NewTestLogger())
 		req := httptest.NewRequest(http.MethodGet, "/auth/me", nil)
 		sess := &domainsession.Session{UserID: vo.UserID(10)}
-		req = req.WithContext(middleware.ContextWithSessionForTest(req.Context(), sess))
+		req = testkit.WithSession(req, sess)
 		rec := httptest.NewRecorder()
 
 		expectedUser := &domainuser.User{ID: vo.UserID(10), Username: "nick"}
@@ -131,7 +129,7 @@ func TestController_Me(t *testing.T) {
 	})
 
 	t.Run("missing session", func(t *testing.T) {
-		ctrl := NewController(nil, nil, nil, newTestLogger())
+		ctrl := NewController(nil, nil, nil, testkit.NewTestLogger())
 		rec := httptest.NewRecorder()
 		req := httptest.NewRequest(http.MethodGet, "/auth/me", nil)
 
@@ -142,10 +140,10 @@ func TestController_Me(t *testing.T) {
 
 	t.Run("user service error", func(t *testing.T) {
 		userSvc := usermock.NewMockService(t)
-		ctrl := NewController(nil, userSvc, nil, newTestLogger())
+		ctrl := NewController(nil, userSvc, nil, testkit.NewTestLogger())
 		req := httptest.NewRequest(http.MethodGet, "/auth/me", nil)
 		sess := &domainsession.Session{UserID: vo.UserID(5)}
-		req = req.WithContext(middleware.ContextWithSessionForTest(req.Context(), sess))
+		req = testkit.WithSession(req, sess)
 		rec := httptest.NewRecorder()
 
 		userSvc.EXPECT().
@@ -159,7 +157,3 @@ func TestController_Me(t *testing.T) {
 }
 
 var errTest = errors.New("test-error")
-
-func newTestLogger() *slog.Logger {
-	return slog.New(slog.NewTextHandler(io.Discard, nil))
-}

@@ -7,7 +7,7 @@ import (
 )
 
 var (
-	configPath = "."
+	configPath = "../"
 	debug      = false
 )
 
@@ -45,7 +45,7 @@ func IsDebug() bool {
 func LoadConfig() (Config, error) {
 	v := viper.New()
 	v.SetConfigName("config")
-	v.SetConfigType("yaml")
+	v.SetConfigType("yml")
 	v.AddConfigPath(configPath)
 
 	if err := v.ReadInConfig(); err != nil {

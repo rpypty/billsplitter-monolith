@@ -14,19 +14,23 @@ import (
 	"gorm.io/gorm/logger"
 
 	"billsplitter-monolith/internal/cfg"
+	billimpl "billsplitter-monolith/internal/domain/bill/impl"
 	eventimpl "billsplitter-monolith/internal/domain/event/impl"
 	paymentmethodimpl "billsplitter-monolith/internal/domain/payment_method/impl"
 	sessionimpl "billsplitter-monolith/internal/domain/session/impl"
 	userimpl "billsplitter-monolith/internal/domain/user/impl"
+	billrepo "billsplitter-monolith/internal/infrastructure/postgres/bill"
 	eventrepo "billsplitter-monolith/internal/infrastructure/postgres/event"
 	paymentmethodrepo "billsplitter-monolith/internal/infrastructure/postgres/payment_method"
 	sessionrepo "billsplitter-monolith/internal/infrastructure/postgres/session"
 	userrepo "billsplitter-monolith/internal/infrastructure/postgres/user"
 	"billsplitter-monolith/internal/transport/http"
 	authhttp "billsplitter-monolith/internal/transport/http/auth"
+	billhttp "billsplitter-monolith/internal/transport/http/bill"
 	meethttp "billsplitter-monolith/internal/transport/http/meet"
 	"billsplitter-monolith/internal/transport/http/middleware"
 	userhttp "billsplitter-monolith/internal/transport/http/user"
+	billuc "billsplitter-monolith/internal/usecase/bill"
 	eventuc "billsplitter-monolith/internal/usecase/event"
 	useruc "billsplitter-monolith/internal/usecase/user"
 	"billsplitter-monolith/internal/utils"
@@ -38,6 +42,10 @@ import (
 // @host            localhost:5001
 // @BasePath        /
 // @schemes         http
+// @securityDefinitions.apikey SessionAuth
+// @in header
+// @name X-Session-ID
+// @description     Сессионный токен. Значение из /auth/login/telegram передавайте через Authorize -> X-Session-ID header.
 func main() {
 	l := slog.New(slog.NewJSONHandler(os.Stdout, nil))
 
@@ -56,23 +64,27 @@ func main() {
 	paymentMethodRepo := paymentmethodrepo.New(db)
 	sessionRepo := sessionrepo.NewRepository(db)
 	eventRepo := eventrepo.NewRepository(db)
+	billRepo := billrepo.NewRepository(db)
 
 	// init service
 	sessionSvc := sessionimpl.New(sessionRepo, l)
 	userSvc := userimpl.New(userRepo)
 	paymentMethodSvc := paymentmethodimpl.New(paymentMethodRepo)
 	eventSvc := eventimpl.New(eventRepo)
+	billSvc := billimpl.New(billRepo)
 
 	// init use case
 	userUC := useruc.New(userSvc, sessionSvc)
 	meetUC := eventuc.New(eventSvc, userSvc)
+	billsUC := billuc.New(billSvc, eventSvc)
 
 	// init http server
 	mw := middleware.NewMiddlewareManager(sessionSvc, l)
 	authCtrl := authhttp.NewController(userUC, userSvc, sessionSvc, l)
 	userCtrl := userhttp.NewController(userSvc, paymentMethodSvc, l)
 	meetCtrl := meethttp.NewController(meetUC, l)
-	httpServer := http.NewServer(mw, authCtrl, userCtrl, meetCtrl, l)
+	billCtrl := billhttp.NewController(billsUC, l)
+	httpServer := http.NewServer(mw, authCtrl, userCtrl, meetCtrl, billCtrl, l)
 
 	go func() {
 		err := httpServer.Start(ctx, appCfg.Server.Http)

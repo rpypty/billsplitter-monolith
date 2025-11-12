@@ -63,6 +63,11 @@ const docTemplate = `{
         },
         "/auth/me": {
             "get": {
+                "security": [
+                    {
+                        "SessionAuth": []
+                    }
+                ],
                 "description": "Возвращает данные пользователя, извлечённые по sessionID из контекста",
                 "produces": [
                     "application/json"
@@ -87,11 +92,135 @@ const docTemplate = `{
                 }
             }
         },
+        "/bills": {
+            "get": {
+                "security": [
+                    {
+                        "SessionAuth": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "bill"
+                ],
+                "summary": "Получить список чеков ивента",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "ID ивента",
+                        "name": "event_id",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/internal_transport_http_bill.Bill"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/billsplitter-monolith_internal_utils_http.ErrorResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/billsplitter-monolith_internal_utils_http.ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/billsplitter-monolith_internal_utils_http.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/billsplitter-monolith_internal_utils_http.ErrorResponse"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "security": [
+                    {
+                        "SessionAuth": []
+                    }
+                ],
+                "description": "Чек создается от имени пользователя из сессии",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "bill"
+                ],
+                "summary": "Создает чек внутри ивента",
+                "parameters": [
+                    {
+                        "description": "Данные чека",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/internal_transport_http_bill.CreateBillRq"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "$ref": "#/definitions/billsplitter-monolith_internal_utils_http.ResponseID"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/billsplitter-monolith_internal_utils_http.ErrorResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/billsplitter-monolith_internal_utils_http.ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/billsplitter-monolith_internal_utils_http.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/billsplitter-monolith_internal_utils_http.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
         "/meets": {
             "get": {
                 "security": [
                     {
-                        "ApiKeyAuth": []
+                        "SessionAuth": []
                     }
                 ],
                 "description": "ID юзера берется из сессии",
@@ -132,7 +261,7 @@ const docTemplate = `{
             "post": {
                 "security": [
                     {
-                        "ApiKeyAuth": []
+                        "SessionAuth": []
                     }
                 ],
                 "description": "Создает новый мит с участниками",
@@ -183,7 +312,7 @@ const docTemplate = `{
             "get": {
                 "security": [
                     {
-                        "ApiKeyAuth": []
+                        "SessionAuth": []
                     }
                 ],
                 "consumes": [
@@ -235,6 +364,11 @@ const docTemplate = `{
         },
         "/payment_methods": {
             "get": {
+                "security": [
+                    {
+                        "SessionAuth": []
+                    }
+                ],
                 "description": "Возвращает список всех платежных методов пользователя",
                 "consumes": [
                     "application/json"
@@ -274,6 +408,11 @@ const docTemplate = `{
                 }
             },
             "post": {
+                "security": [
+                    {
+                        "SessionAuth": []
+                    }
+                ],
                 "description": "Создает новый платежный метод для пользователя",
                 "consumes": [
                     "application/json"
@@ -326,6 +465,11 @@ const docTemplate = `{
         },
         "/payment_methods/{methodId}": {
             "put": {
+                "security": [
+                    {
+                        "SessionAuth": []
+                    }
+                ],
                 "description": "Обновляет существующий платежный метод пользователя",
                 "consumes": [
                     "application/json"
@@ -383,6 +527,11 @@ const docTemplate = `{
                 }
             },
             "delete": {
+                "security": [
+                    {
+                        "SessionAuth": []
+                    }
+                ],
                 "description": "Удаляет платежный метод пользователя",
                 "consumes": [
                     "application/json"
@@ -433,6 +582,11 @@ const docTemplate = `{
         },
         "/user/{id}/payment_methods": {
             "get": {
+                "security": [
+                    {
+                        "SessionAuth": []
+                    }
+                ],
                 "description": "Возвращает список всех платежных методов пользователя",
                 "consumes": [
                     "application/json"
@@ -480,6 +634,11 @@ const docTemplate = `{
                 }
             },
             "post": {
+                "security": [
+                    {
+                        "SessionAuth": []
+                    }
+                ],
                 "description": "Создает новый платежный метод для пользователя",
                 "consumes": [
                     "application/json"
@@ -538,6 +697,11 @@ const docTemplate = `{
         },
         "/user/{id}/payment_methods/{methodId}": {
             "put": {
+                "security": [
+                    {
+                        "SessionAuth": []
+                    }
+                ],
                 "description": "Обновляет существующий платежный метод пользователя",
                 "consumes": [
                     "application/json"
@@ -601,6 +765,11 @@ const docTemplate = `{
                 }
             },
             "delete": {
+                "security": [
+                    {
+                        "SessionAuth": []
+                    }
+                ],
                 "description": "Удаляет платежный метод пользователя",
                 "consumes": [
                     "application/json"
@@ -657,6 +826,11 @@ const docTemplate = `{
         },
         "/user/{id}/profile": {
             "put": {
+                "security": [
+                    {
+                        "SessionAuth": []
+                    }
+                ],
                 "description": "Обновляет профиль пользователя по переданному ID, если пользователь аутентифицирован и имеет доступ",
                 "consumes": [
                     "application/json"
@@ -755,7 +929,7 @@ const docTemplate = `{
         "billsplitter-monolith_internal_utils_http.ResponseID": {
             "type": "object",
             "properties": {
-                "id": {
+                "ID": {
                     "type": "integer"
                 }
             }
@@ -809,6 +983,95 @@ const docTemplate = `{
             "properties": {
                 "user": {
                     "$ref": "#/definitions/billsplitter-monolith_internal_domain_user.User"
+                }
+            }
+        },
+        "internal_transport_http_bill.Bill": {
+            "type": "object",
+            "properties": {
+                "created_at": {
+                    "type": "string"
+                },
+                "created_by_user_id": {
+                    "type": "integer"
+                },
+                "currency": {
+                    "type": "string"
+                },
+                "deleted_at": {
+                    "type": "string"
+                },
+                "event_id": {
+                    "type": "integer"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "participants": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/internal_transport_http_bill.Participant"
+                    }
+                },
+                "split_type": {
+                    "type": "string"
+                },
+                "total_amount": {
+                    "type": "integer"
+                },
+                "updated_at": {
+                    "type": "string"
+                }
+            }
+        },
+        "internal_transport_http_bill.CreateBillRq": {
+            "type": "object",
+            "properties": {
+                "currency": {
+                    "type": "string"
+                },
+                "event_id": {
+                    "type": "integer"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "participants": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/internal_transport_http_bill.ParticipantRq"
+                    }
+                },
+                "split_type": {
+                    "type": "string"
+                },
+                "total_amount": {
+                    "type": "integer"
+                }
+            }
+        },
+        "internal_transport_http_bill.Participant": {
+            "type": "object",
+            "properties": {
+                "amount": {
+                    "type": "integer"
+                },
+                "member_id": {
+                    "type": "integer"
+                }
+            }
+        },
+        "internal_transport_http_bill.ParticipantRq": {
+            "type": "object",
+            "properties": {
+                "amount": {
+                    "type": "integer"
+                },
+                "member_id": {
+                    "type": "integer"
                 }
             }
         },
@@ -870,6 +1133,9 @@ const docTemplate = `{
         "internal_transport_http_meet.Member": {
             "type": "object",
             "properties": {
+                "ID": {
+                    "type": "integer"
+                },
                 "user_id": {
                     "type": "integer"
                 },
@@ -972,6 +1238,14 @@ const docTemplate = `{
                     "example": "johndoe"
                 }
             }
+        }
+    },
+    "securityDefinitions": {
+        "SessionAuth": {
+            "description": "Сессионный токен. Значение из /auth/login/telegram передавайте через Authorize -\u003e X-Session-ID header.",
+            "type": "apiKey",
+            "name": "X-Session-ID",
+            "in": "header"
         }
     }
 }`

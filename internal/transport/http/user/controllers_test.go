@@ -2,23 +2,18 @@ package user
 
 import (
 	"bytes"
-	"context"
 	"encoding/json"
-	"io"
-	"log/slog"
 	"net/http"
 	"net/http/httptest"
 	"testing"
 
 	domainpayment "billsplitter-monolith/internal/domain/payment_method"
-	domainsession "billsplitter-monolith/internal/domain/session"
 	domainuser "billsplitter-monolith/internal/domain/user"
 	vo "billsplitter-monolith/internal/domain/valueobject"
 	paymentmethodmock "billsplitter-monolith/internal/mocks/domain/payment_method"
 	usermock "billsplitter-monolith/internal/mocks/domain/user"
-	"billsplitter-monolith/internal/transport/http/middleware"
+	"billsplitter-monolith/internal/utils/testkit"
 
-	"github.com/go-chi/chi/v5"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
 )
@@ -28,12 +23,12 @@ func TestUserController_UpdateUserProfile(t *testing.T) {
 		userSvc := usermock.NewMockService(t)
 		ctrl := &controllerImpl{
 			userSvc: userSvc,
-			logger:  newTestLogger(),
+			logger:  testkit.NewTestLogger(),
 		}
 		body := bytes.NewBufferString(`{"username":"nick","firstName":"Nick","lastName":"Doe"}`)
 		req := httptest.NewRequest(http.MethodPut, "/user/1/profile", body)
-		req = withSession(req, vo.UserID(1))
-		req = withRouteParams(req, map[string]string{"id": "1"})
+		req = testkit.WithUserSession(req, vo.UserID(1))
+		req = testkit.WithRouteParams(req, map[string]string{"id": "1"})
 		rec := httptest.NewRecorder()
 
 		userSvc.EXPECT().
@@ -50,11 +45,11 @@ func TestUserController_UpdateUserProfile(t *testing.T) {
 	t.Run("forbidden on mismatch", func(t *testing.T) {
 		ctrl := &controllerImpl{
 			userSvc: usermock.NewMockService(t),
-			logger:  newTestLogger(),
+			logger:  testkit.NewTestLogger(),
 		}
 		req := httptest.NewRequest(http.MethodPut, "/user/2/profile", bytes.NewBufferString(`{}`))
-		req = withSession(req, vo.UserID(1))
-		req = withRouteParams(req, map[string]string{"id": "2"})
+		req = testkit.WithUserSession(req, vo.UserID(1))
+		req = testkit.WithRouteParams(req, map[string]string{"id": "2"})
 		rec := httptest.NewRecorder()
 
 		ctrl.UpdateUserProfile(rec, req)
@@ -65,11 +60,11 @@ func TestUserController_UpdateUserProfile(t *testing.T) {
 	t.Run("invalid path id", func(t *testing.T) {
 		ctrl := &controllerImpl{
 			userSvc: usermock.NewMockService(t),
-			logger:  newTestLogger(),
+			logger:  testkit.NewTestLogger(),
 		}
 		req := httptest.NewRequest(http.MethodPut, "/user/foo/profile", bytes.NewBufferString(`{}`))
-		req = withSession(req, vo.UserID(1))
-		req = withRouteParams(req, map[string]string{"id": "foo"})
+		req = testkit.WithUserSession(req, vo.UserID(1))
+		req = testkit.WithRouteParams(req, map[string]string{"id": "foo"})
 		rec := httptest.NewRecorder()
 
 		ctrl.UpdateUserProfile(rec, req)
@@ -85,11 +80,11 @@ func TestUserController_GetPaymentMethods(t *testing.T) {
 		ctrl := &controllerImpl{
 			userSvc:          userSvc,
 			paymentMethodSvc: paymentSvc,
-			logger:           newTestLogger(),
+			logger:           testkit.NewTestLogger(),
 		}
 		req := httptest.NewRequest(http.MethodGet, "/user/1/payment_methods", nil)
-		req = withSession(req, vo.UserID(1))
-		req = withRouteParams(req, map[string]string{"id": "1"})
+		req = testkit.WithUserSession(req, vo.UserID(1))
+		req = testkit.WithRouteParams(req, map[string]string{"id": "1"})
 		rec := httptest.NewRecorder()
 
 		methods := []domainpayment.PaymentMethod{
@@ -113,11 +108,11 @@ func TestUserController_GetPaymentMethods(t *testing.T) {
 		ctrl := &controllerImpl{
 			userSvc:          usermock.NewMockService(t),
 			paymentMethodSvc: paymentmethodmock.NewMockService(t),
-			logger:           newTestLogger(),
+			logger:           testkit.NewTestLogger(),
 		}
 		req := httptest.NewRequest(http.MethodGet, "/user/foo/payment_methods", nil)
-		req = withSession(req, vo.UserID(1))
-		req = withRouteParams(req, map[string]string{"id": "foo"})
+		req = testkit.WithUserSession(req, vo.UserID(1))
+		req = testkit.WithRouteParams(req, map[string]string{"id": "foo"})
 		rec := httptest.NewRecorder()
 
 		ctrl.GetPaymentMethods(rec, req)
@@ -129,11 +124,11 @@ func TestUserController_GetPaymentMethods(t *testing.T) {
 		ctrl := &controllerImpl{
 			userSvc:          usermock.NewMockService(t),
 			paymentMethodSvc: paymentmethodmock.NewMockService(t),
-			logger:           newTestLogger(),
+			logger:           testkit.NewTestLogger(),
 		}
 		req := httptest.NewRequest(http.MethodGet, "/user/2/payment_methods", nil)
-		req = withSession(req, vo.UserID(1))
-		req = withRouteParams(req, map[string]string{"id": "2"})
+		req = testkit.WithUserSession(req, vo.UserID(1))
+		req = testkit.WithRouteParams(req, map[string]string{"id": "2"})
 		rec := httptest.NewRecorder()
 
 		ctrl.GetPaymentMethods(rec, req)
@@ -147,11 +142,11 @@ func TestUserController_CreatePaymentMethod(t *testing.T) {
 		paymentSvc := paymentmethodmock.NewMockService(t)
 		ctrl := &controllerImpl{
 			paymentMethodSvc: paymentSvc,
-			logger:           newTestLogger(),
+			logger:           testkit.NewTestLogger(),
 		}
 		body := bytes.NewBufferString(`{"name":"SBP","description":"desc","recipient":"+7999"}`)
 		req := httptest.NewRequest(http.MethodPost, "/payment_methods", body)
-		req = withSession(req, vo.UserID(5))
+		req = testkit.WithUserSession(req, vo.UserID(5))
 		rec := httptest.NewRecorder()
 
 		created := domainpayment.PaymentMethod{ID: 10, UserID: 5, Name: "SBP", Description: "desc", Recipient: "+7999"}
@@ -173,10 +168,10 @@ func TestUserController_CreatePaymentMethod(t *testing.T) {
 	t.Run("missing required fields", func(t *testing.T) {
 		ctrl := &controllerImpl{
 			paymentMethodSvc: paymentmethodmock.NewMockService(t),
-			logger:           newTestLogger(),
+			logger:           testkit.NewTestLogger(),
 		}
 		req := httptest.NewRequest(http.MethodPost, "/payment_methods", bytes.NewBufferString(`{"description":"desc"}`))
-		req = withSession(req, vo.UserID(5))
+		req = testkit.WithUserSession(req, vo.UserID(5))
 		rec := httptest.NewRecorder()
 
 		ctrl.CreatePaymentMethod(rec, req)
@@ -187,11 +182,11 @@ func TestUserController_CreatePaymentMethod(t *testing.T) {
 	t.Run("forbidden", func(t *testing.T) {
 		ctrl := &controllerImpl{
 			paymentMethodSvc: paymentmethodmock.NewMockService(t),
-			logger:           newTestLogger(),
+			logger:           testkit.NewTestLogger(),
 		}
 		req := httptest.NewRequest(http.MethodPost, "/user/2/payment_methods", bytes.NewBufferString(`{"name":"SBP","recipient":"r"}`))
-		req = withSession(req, vo.UserID(1))
-		req = withRouteParams(req, map[string]string{"id": "2"})
+		req = testkit.WithUserSession(req, vo.UserID(1))
+		req = testkit.WithRouteParams(req, map[string]string{"id": "2"})
 		rec := httptest.NewRecorder()
 
 		ctrl.CreatePaymentMethod(rec, req)
@@ -205,12 +200,12 @@ func TestUserController_UpdatePaymentMethod(t *testing.T) {
 		paymentSvc := paymentmethodmock.NewMockService(t)
 		ctrl := &controllerImpl{
 			paymentMethodSvc: paymentSvc,
-			logger:           newTestLogger(),
+			logger:           testkit.NewTestLogger(),
 		}
 		body := bytes.NewBufferString(`{"name":"SBP","description":"desc","recipient":"+7999"}`)
 		req := httptest.NewRequest(http.MethodPut, "/payment_methods/1", body)
-		req = withSession(req, vo.UserID(1))
-		req = withRouteParams(req, map[string]string{"id": "1", "methodId": "9"})
+		req = testkit.WithUserSession(req, vo.UserID(1))
+		req = testkit.WithRouteParams(req, map[string]string{"id": "1", "methodId": "9"})
 		rec := httptest.NewRecorder()
 
 		paymentSvc.EXPECT().
@@ -227,11 +222,11 @@ func TestUserController_UpdatePaymentMethod(t *testing.T) {
 	t.Run("invalid method id", func(t *testing.T) {
 		ctrl := &controllerImpl{
 			paymentMethodSvc: paymentmethodmock.NewMockService(t),
-			logger:           newTestLogger(),
+			logger:           testkit.NewTestLogger(),
 		}
 		req := httptest.NewRequest(http.MethodPut, "/payment_methods/foo", bytes.NewBufferString(`{}`))
-		req = withSession(req, vo.UserID(1))
-		req = withRouteParams(req, map[string]string{"methodId": "foo"})
+		req = testkit.WithUserSession(req, vo.UserID(1))
+		req = testkit.WithRouteParams(req, map[string]string{"methodId": "foo"})
 		rec := httptest.NewRecorder()
 
 		ctrl.UpdatePaymentMethod(rec, req)
@@ -245,11 +240,11 @@ func TestUserController_DeletePaymentMethod(t *testing.T) {
 		paymentSvc := paymentmethodmock.NewMockService(t)
 		ctrl := &controllerImpl{
 			paymentMethodSvc: paymentSvc,
-			logger:           newTestLogger(),
+			logger:           testkit.NewTestLogger(),
 		}
 		req := httptest.NewRequest(http.MethodDelete, "/payment_methods/9", nil)
-		req = withSession(req, vo.UserID(1))
-		req = withRouteParams(req, map[string]string{"id": "1", "methodId": "9"})
+		req = testkit.WithUserSession(req, vo.UserID(1))
+		req = testkit.WithRouteParams(req, map[string]string{"id": "1", "methodId": "9"})
 		rec := httptest.NewRecorder()
 
 		paymentSvc.EXPECT().
@@ -264,33 +259,15 @@ func TestUserController_DeletePaymentMethod(t *testing.T) {
 	t.Run("forbidden", func(t *testing.T) {
 		ctrl := &controllerImpl{
 			paymentMethodSvc: paymentmethodmock.NewMockService(t),
-			logger:           newTestLogger(),
+			logger:           testkit.NewTestLogger(),
 		}
 		req := httptest.NewRequest(http.MethodDelete, "/user/2/payment_methods/9", nil)
-		req = withSession(req, vo.UserID(1))
-		req = withRouteParams(req, map[string]string{"id": "2", "methodId": "9"})
+		req = testkit.WithUserSession(req, vo.UserID(1))
+		req = testkit.WithRouteParams(req, map[string]string{"id": "2", "methodId": "9"})
 		rec := httptest.NewRecorder()
 
 		ctrl.DeletePaymentMethod(rec, req)
 
 		require.Equal(t, http.StatusForbidden, rec.Code)
 	})
-}
-
-func withSession(req *http.Request, userID vo.UserID) *http.Request {
-	sess := &domainsession.Session{UserID: userID}
-	return req.WithContext(middleware.ContextWithSessionForTest(req.Context(), sess))
-}
-
-func withRouteParams(req *http.Request, params map[string]string) *http.Request {
-	routeCtx := chi.NewRouteContext()
-	for k, v := range params {
-		routeCtx.URLParams.Add(k, v)
-	}
-	ctx := context.WithValue(req.Context(), chi.RouteCtxKey, routeCtx)
-	return req.WithContext(ctx)
-}
-
-func newTestLogger() *slog.Logger {
-	return slog.New(slog.NewTextHandler(io.Discard, nil))
 }

@@ -12,18 +12,26 @@ type UpdateBillRq struct {
 	Currency    *vo.CurrencyCode
 }
 
+type Participant struct {
+	MemberID int64
+	Amount   int64
+}
+
 type Bill struct {
-	ID   int64
+	ID int64
+	// Название чека
 	Name string
 	// CreatedBy - кто создал чек. Чеки могут создавать не только владельцы мита
 	CreatedBy vo.UserID
 	// Participants - юзеры в чеке
-	Participants []vo.UserID
+	Participants []Participant
 	EventID      int64
 	// TotalAmount - полная сумма чека
 	TotalAmount vo.Amount
 	// Currency - валюта в которой оплачивался чек
 	Currency vo.CurrencyCode
+	// Способ разбивки чека
+	SplitTypeID vo.SplitType
 
 	DeletedAt *time.Time
 	UpdatedAt time.Time

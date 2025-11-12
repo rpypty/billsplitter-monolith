@@ -2,3 +2,4 @@ bin
 .env
 .idea
 .testCoverage.txt
+cmd/__debug_bin*

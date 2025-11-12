@@ -95,6 +95,7 @@ func (c *controllerImpl) LoginTelegram(w http.ResponseWriter, r *http.Request) {
 // @Description  Возвращает данные пользователя, извлечённые по sessionID из контекста
 // @Tags         auth
 // @Produce      json
+// @Security     SessionAuth
 // @Success      200  {object}  MeRes
 // @Failure      400  {object}  hu.ErrorResponse  "Пользователь не найден или сессия невалидна"
 // @Router       /auth/me [get]

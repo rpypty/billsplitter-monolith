@@ -46,7 +46,7 @@ func NewController(
 // @Success      201      {object}  hu.ResponseID
 // @Failure      401      {object}  hu.ErrorResponse
 // @Failure      500      {object}  hu.ErrorResponse
-// @Security     ApiKeyAuth
+// @Security     SessionAuth
 // @Router       /meets [post]
 func (c *controllerImpl) CreateMeet(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
@@ -93,7 +93,7 @@ func (c *controllerImpl) CreateMeet(w http.ResponseWriter, r *http.Request) {
 // @Success      200  {array}   Event
 // @Failure      401  {object}  hu.ErrorResponse
 // @Failure      500  {object}  hu.ErrorResponse
-// @Security     ApiKeyAuth
+// @Security     SessionAuth
 // @Router       /meets [get]
 func (c *controllerImpl) FetchUserMeets(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
@@ -138,7 +138,7 @@ func (c *controllerImpl) FetchUserMeets(w http.ResponseWriter, r *http.Request) 
 // @Failure      401  {object}  hu.ErrorResponse
 // @Failure      404  {object}  hu.ErrorResponse
 // @Failure      500  {object}  hu.ErrorResponse
-// @Security     ApiKeyAuth
+// @Security     SessionAuth
 // @Router       /meets/{id} [get]
 func (c *controllerImpl) GetMeetDetailsByID(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()

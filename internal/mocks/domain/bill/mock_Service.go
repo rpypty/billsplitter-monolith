@@ -225,6 +225,74 @@ func (_c *MockService_Delete_Call) RunAndReturn(run func(ctx context.Context, bi
 	return _c
 }
 
+// FetchByEventID provides a mock function for the type MockService
+func (_mock *MockService) FetchByEventID(ctx context.Context, eventID int64) ([]bill.Bill, error) {
+	ret := _mock.Called(ctx, eventID)
+
+	if len(ret) == 0 {
+		panic("no return value specified for FetchByEventID")
+	}
+
+	var r0 []bill.Bill
+	var r1 error
+	if returnFunc, ok := ret.Get(0).(func(context.Context, int64) ([]bill.Bill, error)); ok {
+		return returnFunc(ctx, eventID)
+	}
+	if returnFunc, ok := ret.Get(0).(func(context.Context, int64) []bill.Bill); ok {
+		r0 = returnFunc(ctx, eventID)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).([]bill.Bill)
+		}
+	}
+	if returnFunc, ok := ret.Get(1).(func(context.Context, int64) error); ok {
+		r1 = returnFunc(ctx, eventID)
+	} else {
+		r1 = ret.Error(1)
+	}
+	return r0, r1
+}
+
+// MockService_FetchByEventID_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'FetchByEventID'
+type MockService_FetchByEventID_Call struct {
+	*mock.Call
+}
+
+// FetchByEventID is a helper method to define mock.On call
+//   - ctx context.Context
+//   - eventID int64
+func (_e *MockService_Expecter) FetchByEventID(ctx interface{}, eventID interface{}) *MockService_FetchByEventID_Call {
+	return &MockService_FetchByEventID_Call{Call: _e.mock.On("FetchByEventID", ctx, eventID)}
+}
+
+func (_c *MockService_FetchByEventID_Call) Run(run func(ctx context.Context, eventID int64)) *MockService_FetchByEventID_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		var arg0 context.Context
+		if args[0] != nil {
+			arg0 = args[0].(context.Context)
+		}
+		var arg1 int64
+		if args[1] != nil {
+			arg1 = args[1].(int64)
+		}
+		run(
+			arg0,
+			arg1,
+		)
+	})
+	return _c
+}
+
+func (_c *MockService_FetchByEventID_Call) Return(bills []bill.Bill, err error) *MockService_FetchByEventID_Call {
+	_c.Call.Return(bills, err)
+	return _c
+}
+
+func (_c *MockService_FetchByEventID_Call) RunAndReturn(run func(ctx context.Context, eventID int64) ([]bill.Bill, error)) *MockService_FetchByEventID_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
 // RemoveUsers provides a mock function for the type MockService
 func (_mock *MockService) RemoveUsers(ctx context.Context, billID int64, users []valueobject.UserID) error {
 	ret := _mock.Called(ctx, billID, users)

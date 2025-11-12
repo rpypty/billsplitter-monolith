@@ -2,38 +2,35 @@ package meet
 
 import (
 	"bytes"
-	"context"
 	"encoding/json"
 	"errors"
-	"io"
-	"log/slog"
 	"net/http"
 	"net/http/httptest"
 	"testing"
 
 	domainevent "billsplitter-monolith/internal/domain/event"
-	domainsession "billsplitter-monolith/internal/domain/session"
 	vo "billsplitter-monolith/internal/domain/valueobject"
 	eventucmock "billsplitter-monolith/internal/mocks/usecase/event"
-	"billsplitter-monolith/internal/transport/http/middleware"
 	usecaseevent "billsplitter-monolith/internal/usecase/event"
 	hu "billsplitter-monolith/internal/utils/http"
+	"billsplitter-monolith/internal/utils/testkit"
 
-	"github.com/go-chi/chi/v5"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
 )
+
+var errMeetTest = errors.New("meet-test-error")
 
 func TestMeetController_CreateMeet(t *testing.T) {
 	t.Run("success", func(t *testing.T) {
 		eventUC := eventucmock.NewMockUseCase(t)
 		ctrl := &controllerImpl{
 			eventUC: eventUC,
-			logger:  newTestLogger(),
+			logger:  testkit.NewTestLogger(),
 		}
 		body := bytes.NewBufferString(`{"name":"Party","members":["Bob"]}`)
 		req := httptest.NewRequest(http.MethodPost, "/meets", body)
-		req = withMeetSession(req, vo.UserID(10))
+		req = testkit.WithUserSession(req, vo.UserID(10))
 		rec := httptest.NewRecorder()
 
 		eventUC.EXPECT().
@@ -52,9 +49,9 @@ func TestMeetController_CreateMeet(t *testing.T) {
 
 	t.Run("decode error", func(t *testing.T) {
 		eventUC := eventucmock.NewMockUseCase(t)
-		ctrl := &controllerImpl{eventUC: eventUC, logger: newTestLogger()}
+		ctrl := &controllerImpl{eventUC: eventUC, logger: testkit.NewTestLogger()}
 		req := httptest.NewRequest(http.MethodPost, "/meets", bytes.NewBufferString(`invalid`))
-		req = withMeetSession(req, vo.UserID(1))
+		req = testkit.WithUserSession(req, vo.UserID(1))
 		rec := httptest.NewRecorder()
 
 		ctrl.CreateMeet(rec, req)
@@ -64,9 +61,9 @@ func TestMeetController_CreateMeet(t *testing.T) {
 
 	t.Run("usecase error", func(t *testing.T) {
 		eventUC := eventucmock.NewMockUseCase(t)
-		ctrl := &controllerImpl{eventUC: eventUC, logger: newTestLogger()}
+		ctrl := &controllerImpl{eventUC: eventUC, logger: testkit.NewTestLogger()}
 		req := httptest.NewRequest(http.MethodPost, "/meets", bytes.NewBufferString(`{"name":"Party"}`))
-		req = withMeetSession(req, vo.UserID(1))
+		req = testkit.WithUserSession(req, vo.UserID(1))
 		rec := httptest.NewRecorder()
 
 		eventUC.EXPECT().
@@ -82,9 +79,9 @@ func TestMeetController_CreateMeet(t *testing.T) {
 func TestMeetController_FetchUserMeets(t *testing.T) {
 	t.Run("success", func(t *testing.T) {
 		eventUC := eventucmock.NewMockUseCase(t)
-		ctrl := &controllerImpl{eventUC: eventUC, logger: newTestLogger()}
+		ctrl := &controllerImpl{eventUC: eventUC, logger: testkit.NewTestLogger()}
 		req := httptest.NewRequest(http.MethodGet, "/meets", nil)
-		req = withMeetSession(req, vo.UserID(7))
+		req = testkit.WithUserSession(req, vo.UserID(7))
 		rec := httptest.NewRecorder()
 
 		events := []domainevent.Event{
@@ -105,7 +102,7 @@ func TestMeetController_FetchUserMeets(t *testing.T) {
 	})
 
 	t.Run("missing session", func(t *testing.T) {
-		ctrl := &controllerImpl{eventUC: eventucmock.NewMockUseCase(t), logger: newTestLogger()}
+		ctrl := &controllerImpl{eventUC: eventucmock.NewMockUseCase(t), logger: testkit.NewTestLogger()}
 		req := httptest.NewRequest(http.MethodGet, "/meets", nil)
 		rec := httptest.NewRecorder()
 
@@ -115,9 +112,9 @@ func TestMeetController_FetchUserMeets(t *testing.T) {
 	})
 
 	t.Run("nil session", func(t *testing.T) {
-		ctrl := &controllerImpl{eventUC: eventucmock.NewMockUseCase(t), logger: newTestLogger()}
+		ctrl := &controllerImpl{eventUC: eventucmock.NewMockUseCase(t), logger: testkit.NewTestLogger()}
 		req := httptest.NewRequest(http.MethodGet, "/meets", nil)
-		req = req.WithContext(middleware.ContextWithSessionForTest(req.Context(), nil))
+		req = testkit.WithSession(req, nil)
 		rec := httptest.NewRecorder()
 
 		ctrl.FetchUserMeets(rec, req)
@@ -127,9 +124,9 @@ func TestMeetController_FetchUserMeets(t *testing.T) {
 
 	t.Run("usecase error", func(t *testing.T) {
 		eventUC := eventucmock.NewMockUseCase(t)
-		ctrl := &controllerImpl{eventUC: eventUC, logger: newTestLogger()}
+		ctrl := &controllerImpl{eventUC: eventUC, logger: testkit.NewTestLogger()}
 		req := httptest.NewRequest(http.MethodGet, "/meets", nil)
-		req = withMeetSession(req, vo.UserID(7))
+		req = testkit.WithUserSession(req, vo.UserID(7))
 		rec := httptest.NewRecorder()
 
 		eventUC.EXPECT().
@@ -145,9 +142,9 @@ func TestMeetController_FetchUserMeets(t *testing.T) {
 func TestMeetController_GetMeetDetailsByID(t *testing.T) {
 	t.Run("success", func(t *testing.T) {
 		eventUC := eventucmock.NewMockUseCase(t)
-		ctrl := &controllerImpl{eventUC: eventUC, logger: newTestLogger()}
+		ctrl := &controllerImpl{eventUC: eventUC, logger: testkit.NewTestLogger()}
 		req := httptest.NewRequest(http.MethodGet, "/meets/1", nil)
-		req = withRouteParams(req, map[string]string{"id": "1"})
+		req = testkit.WithRouteParams(req, map[string]string{"id": "1"})
 		rec := httptest.NewRecorder()
 
 		eventObj := &domainevent.Event{ID: 1, Name: "Party"}
@@ -165,9 +162,9 @@ func TestMeetController_GetMeetDetailsByID(t *testing.T) {
 	})
 
 	t.Run("invalid id", func(t *testing.T) {
-		ctrl := &controllerImpl{eventUC: eventucmock.NewMockUseCase(t), logger: newTestLogger()}
+		ctrl := &controllerImpl{eventUC: eventucmock.NewMockUseCase(t), logger: testkit.NewTestLogger()}
 		req := httptest.NewRequest(http.MethodGet, "/meets/foo", nil)
-		req = withRouteParams(req, map[string]string{"id": "foo"})
+		req = testkit.WithRouteParams(req, map[string]string{"id": "foo"})
 		rec := httptest.NewRecorder()
 
 		ctrl.GetMeetDetailsByID(rec, req)
@@ -177,9 +174,9 @@ func TestMeetController_GetMeetDetailsByID(t *testing.T) {
 
 	t.Run("usecase error", func(t *testing.T) {
 		eventUC := eventucmock.NewMockUseCase(t)
-		ctrl := &controllerImpl{eventUC: eventUC, logger: newTestLogger()}
+		ctrl := &controllerImpl{eventUC: eventUC, logger: testkit.NewTestLogger()}
 		req := httptest.NewRequest(http.MethodGet, "/meets/1", nil)
-		req = withRouteParams(req, map[string]string{"id": "1"})
+		req = testkit.WithRouteParams(req, map[string]string{"id": "1"})
 		rec := httptest.NewRecorder()
 
 		eventUC.EXPECT().
@@ -193,9 +190,9 @@ func TestMeetController_GetMeetDetailsByID(t *testing.T) {
 
 	t.Run("not found", func(t *testing.T) {
 		eventUC := eventucmock.NewMockUseCase(t)
-		ctrl := &controllerImpl{eventUC: eventUC, logger: newTestLogger()}
+		ctrl := &controllerImpl{eventUC: eventUC, logger: testkit.NewTestLogger()}
 		req := httptest.NewRequest(http.MethodGet, "/meets/1", nil)
-		req = withRouteParams(req, map[string]string{"id": "1"})
+		req = testkit.WithRouteParams(req, map[string]string{"id": "1"})
 		rec := httptest.NewRecorder()
 
 		eventUC.EXPECT().
@@ -206,24 +203,4 @@ func TestMeetController_GetMeetDetailsByID(t *testing.T) {
 
 		require.Equal(t, http.StatusNotFound, rec.Code)
 	})
-}
-
-func withMeetSession(req *http.Request, userID vo.UserID) *http.Request {
-	sess := &domainsession.Session{UserID: userID}
-	return req.WithContext(middleware.ContextWithSessionForTest(req.Context(), sess))
-}
-
-func withRouteParams(req *http.Request, params map[string]string) *http.Request {
-	routeCtx := chi.NewRouteContext()
-	for k, v := range params {
-		routeCtx.URLParams.Add(k, v)
-	}
-	ctx := context.WithValue(req.Context(), chi.RouteCtxKey, routeCtx)
-	return req.WithContext(ctx)
-}
-
-var errMeetTest = errors.New("meet-test-error")
-
-func newTestLogger() *slog.Logger {
-	return slog.New(slog.NewTextHandler(io.Discard, nil))
 }

@@ -55,6 +55,7 @@ func NewController(
 // @Tags         user
 // @Accept       json
 // @Produce      json
+// @Security     SessionAuth
 // @Param        id       path      int                     true  "ID пользователя"
 // @Param        request  body      UpdateUserProfileReq    true  "Данные для обновления профиля"
 // @Success      200      {object}  hu.ResponseOK           "Профиль успешно обновлён"
@@ -112,6 +113,7 @@ func (c *controllerImpl) UpdateUserProfile(w http.ResponseWriter, r *http.Reques
 // @Tags         user
 // @Accept       json
 // @Produce      json
+// @Security     SessionAuth
 // @Param        id  path      int  false  "ID пользователя (опционально, если не указан - берется из сессии)"
 // @Success      200     {object}  PaymentMethodsResponse  "Список платежных методов"
 // @Failure      400     {object}  hu.ErrorResponse        "Некорректный запрос или ошибка сессии"
@@ -177,6 +179,7 @@ func (c *controllerImpl) GetPaymentMethods(w http.ResponseWriter, r *http.Reques
 // @Tags         user
 // @Accept       json
 // @Produce      json
+// @Security     SessionAuth
 // @Param        id  path      int                    false  "ID пользователя (опционально, если не указан - берется из сессии)"
 // @Param        request body      CreatePaymentMethodReq true  "Данные для создания платежного метода"
 // @Success      201     {object}  PaymentMethodResponse  "Платежный метод успешно создан"
@@ -272,6 +275,7 @@ func (c *controllerImpl) CreatePaymentMethod(w http.ResponseWriter, r *http.Requ
 // @Tags         user
 // @Accept       json
 // @Produce      json
+// @Security     SessionAuth
 // @Param        id  path      int                    false  "ID пользователя (опционально, если не указан - берется из сессии)"
 // @Param        methodId      path      int                    true  "ID платежного метода"
 // @Param        request body      UpdatePaymentMethodReq true  "Данные для обновления платежного метода"
@@ -344,6 +348,7 @@ func (c *controllerImpl) UpdatePaymentMethod(w http.ResponseWriter, r *http.Requ
 // @Tags         user
 // @Accept       json
 // @Produce      json
+// @Security     SessionAuth
 // @Param        id  path      int  false  "ID пользователя (опционально, если не указан - берется из сессии)"
 // @Param        methodId      path      int  true  "ID платежного метода"
 // @Success      200     {object}  hu.ResponseOK    "Платежный метод успешно удалён"

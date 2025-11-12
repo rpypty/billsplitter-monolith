@@ -10,6 +10,9 @@ type Service interface {
 	// Create - создать новый чек в мите
 	Create(ctx context.Context, bill Bill) (int64, error)
 
+	// FetchByEventID - получить все чеки конкретного ивента
+	FetchByEventID(ctx context.Context, eventID int64) ([]Bill, error)
+
 	// Update - обновляет поля в чеке
 	Update(ctx context.Context, rq UpdateBillRq) error
 
@@ -21,4 +24,9 @@ type Service interface {
 
 	// Delete - удаляет чек. Используется soft delete (deletedAt поле)
 	Delete(ctx context.Context, billID int64) error
+}
+
+type Repository interface {
+	Create(ctx context.Context, bill Bill) (int64, error)
+	FetchByEventID(ctx context.Context, eventID int64) ([]Bill, error)
 }

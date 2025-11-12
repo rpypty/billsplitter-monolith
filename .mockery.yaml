@@ -53,3 +53,10 @@ packages:
       pkgname: userusecasemock
     interfaces:
       UseCase: {}
+
+  billsplitter-monolith/internal/usecase/bill:
+    config:
+      dir: internal/mocks/usecase/bill
+      pkgname: billusecasemock
+    interfaces:
+      UseCase: {}

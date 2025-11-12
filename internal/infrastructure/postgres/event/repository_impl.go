@@ -86,7 +86,8 @@ func (r *RepositoryImpl) GetByID(ctx context.Context, eventID int64) (*domain.Ev
 	err := r.db.
 		WithContext(ctx).
 		Preload("Members").
-		Find(&entityEvent, "event_id = ?", eventID).Error
+		Find(&entityEvent, "id = ?", eventID).
+		Error
 	if err != nil {
 		return nil, err
 	}

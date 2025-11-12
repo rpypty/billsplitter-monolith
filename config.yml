@@ -1,10 +1,10 @@
-debug: true
+debug: true # включает дебаг логи и в http ответы прокидывает подробные ошибки 
 server:
   http:
-    port: ":5001"
+    port: ":5001" # порт на котором запускается http сервер
 
 telegram:
-  bot_token:
+  bot_token: # токен бота для нотификаций
 
 storage:
   postgres:

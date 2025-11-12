@@ -8,6 +8,7 @@ import (
 
 	"billsplitter-monolith/internal/cfg"
 	"billsplitter-monolith/internal/transport/http/auth"
+	"billsplitter-monolith/internal/transport/http/bill"
 	"billsplitter-monolith/internal/transport/http/meet"
 	mw "billsplitter-monolith/internal/transport/http/middleware"
 	"billsplitter-monolith/internal/transport/http/user"
@@ -24,6 +25,7 @@ type Server struct {
 	authCtrl auth.Controller
 	userCtrl user.Controller
 	meetCtrl meet.Controller
+	billCtrl bill.Controller
 	mw       mw.Manager
 
 	httpSrv *http.Server
@@ -35,12 +37,14 @@ func NewServer(
 	authCtrl auth.Controller,
 	userCtrl user.Controller,
 	meetCtrl meet.Controller,
+	billCtrl bill.Controller,
 	logger *slog.Logger,
 ) *Server {
 	return &Server{
 		authCtrl: authCtrl,
 		userCtrl: userCtrl,
 		meetCtrl: meetCtrl,
+		billCtrl: billCtrl,
 		logger:   logger,
 		mw:       mw,
 	}
@@ -72,6 +76,7 @@ func (s *Server) Start(_ context.Context, cfg cfg.Http) error {
 	auth.InitRoutes(r, s.authCtrl, s.mw)
 	user.InitRoutes(r, s.userCtrl, s.mw)
 	meet.InitRoutes(r, s.meetCtrl, s.mw)
+	bill.InitRoutes(r, s.billCtrl, s.mw)
 
 	s.httpSrv = &http.Server{
 		Addr:              cfg.Port,
