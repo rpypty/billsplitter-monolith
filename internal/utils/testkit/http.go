@@ -20,7 +20,7 @@ func WithUserSession(req *http.Request, userID vo.UserID) *http.Request {
 
 // WithSession injects given session into request context (session may be nil).
 func WithSession(req *http.Request, sess *domainsession.Session) *http.Request {
-	return req.WithContext(middleware.ContextWithSessionForTest(req.Context(), sess))
+	return req.WithContext(middleware.InjectUserInSession(req.Context(), sess))
 }
 
 // WithRouteParams adds chi route params to request.

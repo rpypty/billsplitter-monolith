@@ -8,6 +8,7 @@ import (
 	"billsplitter-monolith/internal/domain/user"
 	vo "billsplitter-monolith/internal/domain/valueobject"
 	"billsplitter-monolith/internal/errors"
+	"billsplitter-monolith/internal/transport/http/middleware"
 )
 
 type UseCase interface {
@@ -65,10 +66,40 @@ func (uc *UseCaseImpl) FetchUserMeets(ctx context.Context, userID vo.UserID) ([]
 }
 
 func (uc *UseCaseImpl) GetMeetByID(ctx context.Context, meetID int64) (*event.Event, error) {
-	events, err := uc.eventSvc.GetByID(ctx, meetID)
+	event, err := uc.eventSvc.GetByID(ctx, meetID)
 	if err != nil {
 		return nil, err
 	}
 
-	return events, nil
+	if event == nil || event.ID == 0 {
+		return nil, nil
+	}
+
+	userID, err := middleware.ExtractUserFromContext(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	if err := uc.validateEvent(event, userID); err != nil {
+		return nil, err
+	}
+
+	return event, nil
+}
+
+func (uc *UseCaseImpl) validateEvent(ev *event.Event, sessionUserID vo.UserID) error {
+	userMemberIndex := make(map[vo.UserID]struct{}, len(ev.Members))
+	for _, m := range ev.Members {
+		if m.UserID == nil {
+			continue
+		}
+		userMemberIndex[*m.UserID] = struct{}{}
+	}
+
+	// проверяем есть ли инициатор запроса в этом ивенте
+	if _, ok := userMemberIndex[sessionUserID]; !ok {
+		return errors.ErrForbiden
+	}
+
+	return nil
 }

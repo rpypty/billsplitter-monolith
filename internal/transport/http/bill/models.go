@@ -8,6 +8,7 @@ type CreateBillRq struct {
 	TotalAmount  int64           `json:"total_amount"`
 	Currency     string          `json:"currency"`
 	SplitType    string          `json:"split_type"`
+	PaidBy       int64           `json:"paid_by"`
 	Participants []ParticipantRq `json:"participants"`
 }
 
@@ -29,6 +30,7 @@ type Bill struct {
 	TotalAmount     int64         `json:"total_amount"`
 	Currency        string        `json:"currency"`
 	SplitType       string        `json:"split_type"`
+	PaidBy          int64         `json:"paid_by"`
 	Participants    []Participant `json:"participants"`
 	CreatedAt       time.Time     `json:"created_at"`
 	UpdatedAt       time.Time     `json:"updated_at"`

@@ -20,6 +20,7 @@ func fromDomainBill(b domainbill.Bill) Bill {
 		TotalAmount:     int64(b.TotalAmount),
 		Currency:        string(b.Currency),
 		SplitType:       string(b.SplitTypeID),
+		PaidBy:          b.PaidBy,
 		Participants:    participants,
 		CreatedAt:       b.CreatedAt,
 		UpdatedAt:       b.UpdatedAt,

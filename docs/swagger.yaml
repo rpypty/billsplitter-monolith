@@ -79,6 +79,8 @@ definitions:
         type: integer
       name:
         type: string
+      paid_by:
+        type: integer
       participants:
         items:
           $ref: '#/definitions/internal_transport_http_bill.Participant'
@@ -98,6 +100,8 @@ definitions:
         type: integer
       name:
         type: string
+      paid_by:
+        type: integer
       participants:
         items:
           $ref: '#/definitions/internal_transport_http_bill.ParticipantRq'

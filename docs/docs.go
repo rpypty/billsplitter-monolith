@@ -1010,6 +1010,9 @@ const docTemplate = `{
                 "name": {
                     "type": "string"
                 },
+                "paid_by": {
+                    "type": "integer"
+                },
                 "participants": {
                     "type": "array",
                     "items": {
@@ -1038,6 +1041,9 @@ const docTemplate = `{
                 },
                 "name": {
                     "type": "string"
+                },
+                "paid_by": {
+                    "type": "integer"
                 },
                 "participants": {
                     "type": "array",

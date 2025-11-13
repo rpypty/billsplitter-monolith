@@ -8,6 +8,8 @@ import (
 	domainevent "billsplitter-monolith/internal/domain/event"
 	vo "billsplitter-monolith/internal/domain/valueobject"
 	"billsplitter-monolith/internal/errors"
+	apperrors "billsplitter-monolith/internal/errors"
+	"billsplitter-monolith/internal/transport/http/middleware"
 )
 
 type UseCase interface {
@@ -23,10 +25,11 @@ type UseCaseImpl struct {
 type CreateBillRq struct {
 	EventID      int64
 	Name         string
-	CreatedBy    vo.UserID
+	CreatedBy    vo.UserID // userID из сессии инициатора запроса на создание чека
 	TotalAmount  vo.Amount
 	Currency     vo.CurrencyCode
 	SplitType    vo.SplitType
+	PaidBy       int64 // memberID - не путать с userID. memberID - это айди сущности участника ивента, а не профиля пользователя - это разные таблицы (user и event_members)
 	Participants []domainbill.Participant
 }
 
@@ -47,7 +50,7 @@ func (uc *UseCaseImpl) CreateBill(ctx context.Context, rq CreateBillRq) (int64, 
 		return 0, err
 	}
 
-	if err := uc.validateParticipants(eventModel, rq.Participants); err != nil {
+	if err := uc.validateParticipants(eventModel, rq); err != nil {
 		return 0, err
 	}
 
@@ -55,6 +58,7 @@ func (uc *UseCaseImpl) CreateBill(ctx context.Context, rq CreateBillRq) (int64, 
 		Name:         rq.Name,
 		CreatedBy:    rq.CreatedBy,
 		Participants: rq.Participants,
+		PaidBy:       rq.PaidBy,
 		EventID:      rq.EventID,
 		TotalAmount:  rq.TotalAmount,
 		Currency:     rq.Currency,
@@ -68,7 +72,21 @@ func (uc *UseCaseImpl) CreateBill(ctx context.Context, rq CreateBillRq) (int64, 
 }
 
 func (uc *UseCaseImpl) FetchEventBills(ctx context.Context, eventID int64) ([]domainbill.Bill, error) {
-	if _, err := uc.getEvent(ctx, eventID); err != nil {
+	event, err := uc.getEvent(ctx, eventID)
+	if err != nil {
+		return nil, err
+	}
+
+	if event == nil || event.ID == 0 {
+		return nil, nil
+	}
+
+	userID, err := middleware.ExtractUserFromContext(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	if err := uc.validateEvent(event, userID); err != nil {
 		return nil, err
 	}
 
@@ -88,17 +106,55 @@ func (uc *UseCaseImpl) getEvent(ctx context.Context, eventID int64) (*domaineven
 	return ev, nil
 }
 
-func (uc *UseCaseImpl) validateParticipants(ev *domainevent.Event, participants []domainbill.Participant) error {
-	if len(participants) == 0 {
-		return nil
+func (uc *UseCaseImpl) validateEvent(ev *domainevent.Event, sessionUserID vo.UserID) error {
+	userMemberIndex := make(map[vo.UserID]struct{}, len(ev.Members))
+	for _, m := range ev.Members {
+		if m.UserID == nil {
+			continue
+		}
+		userMemberIndex[*m.UserID] = struct{}{}
 	}
+
+	// проверяем есть ли инициатор запроса в этом ивенте
+	if _, ok := userMemberIndex[sessionUserID]; !ok {
+		return apperrors.ErrForbiden
+	}
+
+	return nil
+}
+
+func (uc *UseCaseImpl) validateParticipants(ev *domainevent.Event, rq CreateBillRq) error {
+	if rq.PaidBy == 0 {
+		return errors.ErrValidationFunc("paid_by must be provided")
+	}
+
+	if rq.CreatedBy == 0 {
+		return errors.ErrValidationFunc("created_by must be provided")
+	}
+
+	var createdByBelogsToEvent bool
 
 	memberIndex := make(map[int64]struct{}, len(ev.Members))
 	for _, m := range ev.Members {
 		memberIndex[m.ID] = struct{}{}
+
+		if m.UserID != nil && *m.UserID == rq.CreatedBy {
+			createdByBelogsToEvent = true
+		}
 	}
 
-	for _, p := range participants {
+	// проверяем что инициатор запроса вообще принадлежит этому инвета
+	if !createdByBelogsToEvent {
+		return errors.ErrValidationFunc(fmt.Sprintf("created_by %d does not belong to event %d", rq.CreatedBy, ev.ID))
+	}
+
+	// проверяем что юзер который платит принадлежит этому ивенту
+	if _, ok := memberIndex[int64(rq.PaidBy)]; !ok {
+		return errors.ErrValidationFunc(fmt.Sprintf("paid_by %d does not belong to event %d", rq.PaidBy, ev.ID))
+	}
+
+	// проверяем что все юзеры в чеке принадлежат этому ивенту
+	for _, p := range rq.Participants {
 		if _, ok := memberIndex[p.MemberID]; !ok {
 			return errors.ErrValidationFunc(fmt.Sprintf("member_id %d does not belong to event %d", p.MemberID, ev.ID))
 		}

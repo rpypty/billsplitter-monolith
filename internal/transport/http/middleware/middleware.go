@@ -1,7 +1,6 @@
 package middleware
 
 import (
-	"context"
 	"log/slog"
 	"net/http"
 
@@ -57,7 +56,7 @@ func (mw *middlewareManagerImpl) Auth() MWFunc {
 				return
 			}
 
-			ctx := context.WithValue(r.Context(), sessionContextKey, sessionInfo)
+			ctx := InjectUserInSession(r.Context(), sessionInfo)
 
 			next.ServeHTTP(w, r.WithContext(ctx))
 		})

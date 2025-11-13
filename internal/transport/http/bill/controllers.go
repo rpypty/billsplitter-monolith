@@ -82,6 +82,7 @@ func (c *controllerImpl) CreateBill(w http.ResponseWriter, r *http.Request) {
 		TotalAmount:  vo.Amount(rq.TotalAmount),
 		Currency:     vo.CurrencyCode(rq.Currency),
 		SplitType:    vo.SplitType(rq.SplitType),
+		PaidBy:       rq.PaidBy,
 		Participants: participants,
 	}
 
@@ -142,6 +143,9 @@ func (c *controllerImpl) FetchEventBills(w http.ResponseWriter, r *http.Request)
 		status := http.StatusInternalServerError
 		if errors.Is(err, apperrors.ErrEventNotFound) {
 			status = http.StatusNotFound
+		}
+		if errors.Is(err, apperrors.ErrForbiden) {
+			status = http.StatusForbidden
 		}
 		hu.RespondErrWithStatus(w, status, err.Error())
 		l.Error(fmt.Sprintf("billController.FetchEventBills error: %s", err))

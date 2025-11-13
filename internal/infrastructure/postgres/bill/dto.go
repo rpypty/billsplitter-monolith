@@ -15,6 +15,7 @@ type billEntity struct {
 	EventID         int64                   `gorm:"column:event_id"`
 	Name            string                  `gorm:"column:name"`
 	CreatedByUserID int64                   `gorm:"column:created_by_user_id"`
+	PaidBy          int64                   `gorm:"column:paid_by"`
 	TotalAmount     int64                   `gorm:"column:total_amount"`
 	Currency        string                  `gorm:"column:currency"`
 	SplitType       string                  `gorm:"column:split_type"`
@@ -58,6 +59,7 @@ func billFromDomain(d *domain.Bill) *billEntity {
 		EventID:         d.EventID,
 		Name:            d.Name,
 		CreatedByUserID: int64(d.CreatedBy),
+		PaidBy:          d.PaidBy,
 		TotalAmount:     int64(d.TotalAmount),
 		Currency:        string(d.Currency),
 		SplitType:       string(d.SplitTypeID),
@@ -87,6 +89,7 @@ func billToDomain(e *billEntity) *domain.Bill {
 		Name:         e.Name,
 		CreatedBy:    vo.UserID(e.CreatedByUserID),
 		Participants: participants,
+		PaidBy:       e.PaidBy,
 		EventID:      e.EventID,
 		TotalAmount:  vo.Amount(e.TotalAmount),
 		Currency:     vo.CurrencyCode(e.Currency),

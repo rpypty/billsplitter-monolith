@@ -7,15 +7,20 @@ import (
 	"time"
 
 	domainevent "billsplitter-monolith/internal/domain/event"
+	"billsplitter-monolith/internal/domain/session"
 	domainuser "billsplitter-monolith/internal/domain/user"
 	vo "billsplitter-monolith/internal/domain/valueobject"
 	appErrors "billsplitter-monolith/internal/errors"
 	eventmock "billsplitter-monolith/internal/mocks/domain/event"
 	usermock "billsplitter-monolith/internal/mocks/domain/user"
+	"billsplitter-monolith/internal/transport/http/middleware"
+	"billsplitter-monolith/internal/utils"
 
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
 )
+
+var testUserID = utils.Ptr[vo.UserID](1)
 
 func TestUseCase_CreateMeet(t *testing.T) {
 	t.Run("success", func(t *testing.T) {
@@ -161,9 +166,42 @@ func TestUseCase_GetMeetByID(t *testing.T) {
 		eventSvc := eventmock.NewMockService(t)
 		userSvc := usermock.NewMockService(t)
 		uc := New(eventSvc, userSvc)
-		ctx := context.Background()
+		ctx := middleware.InjectUserInSession(context.Background(), &session.Session{UserID: *testUserID})
+
 		meetID := int64(42)
-		expected := &domainevent.Event{ID: meetID}
+		expected := &domainevent.Event{
+			ID: meetID,
+			Members: []domainevent.Member{
+				{
+					UserID: testUserID,
+				},
+			},
+		}
+
+		eventSvc.EXPECT().
+			GetByID(mock.Anything, meetID).
+			Return(expected, nil)
+
+		meet, err := uc.GetMeetByID(ctx, meetID)
+
+		require.NoError(t, err)
+		require.Equal(t, expected, meet)
+	})
+
+	t.Run("forbidden event", func(t *testing.T) {
+		eventSvc := eventmock.NewMockService(t)
+		userSvc := usermock.NewMockService(t)
+		uc := New(eventSvc, userSvc)
+		ctx := middleware.InjectUserInSession(context.Background(), &session.Session{UserID: *testUserID})
+		meetID := int64(42)
+		expected := &domainevent.Event{
+			ID: meetID,
+			Members: []domainevent.Member{
+				{
+					UserID: testUserID,
+				},
+			},
+		}
 
 		eventSvc.EXPECT().
 			GetByID(mock.Anything, meetID).

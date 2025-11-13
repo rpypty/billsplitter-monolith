@@ -25,7 +25,9 @@ type Bill struct {
 	CreatedBy vo.UserID
 	// Participants - юзеры в чеке
 	Participants []Participant
-	EventID      int64
+	// PaidBy - ID участника (member), который оплатил чек
+	PaidBy  int64
+	EventID int64
 	// TotalAmount - полная сумма чека
 	TotalAmount vo.Amount
 	// Currency - валюта в которой оплачивался чек

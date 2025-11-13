@@ -1,10 +1,12 @@
 package meet
 
 import (
+	"errors"
 	"fmt"
 	"log/slog"
 	"net/http"
 
+	apperrors "billsplitter-monolith/internal/errors"
 	"billsplitter-monolith/internal/transport/http/middleware"
 	"billsplitter-monolith/internal/usecase/event"
 	hu "billsplitter-monolith/internal/utils/http"
@@ -152,7 +154,11 @@ func (c *controllerImpl) GetMeetDetailsByID(w http.ResponseWriter, r *http.Reque
 
 	meet, err := c.eventUC.GetMeetByID(ctx, meetID)
 	if err != nil {
-		hu.RespondErrWithStatus(w, http.StatusInternalServerError, err.Error())
+		status := http.StatusInternalServerError
+		if errors.Is(err, apperrors.ErrForbiden) {
+			status = http.StatusForbidden
+		}
+		hu.RespondErrWithStatus(w, status, err.Error())
 		l.Error(fmt.Sprintf("meetController.CreateMeetRq error: %s", err))
 		return
 	}

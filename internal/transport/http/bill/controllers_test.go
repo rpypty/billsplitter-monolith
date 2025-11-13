@@ -27,14 +27,18 @@ func TestBillController_CreateBill(t *testing.T) {
 		uc := billusecasemock.NewMockUseCase(t)
 		ctrl := &controllerImpl{billUC: uc, logger: testkit.NewTestLogger()}
 
-		body := bytes.NewBufferString(`{"event_id":1,"name":"Dinner","total_amount":1000,"currency":"BYN","split_type":"even","participants":[{"member_id":10,"amount":500}]}`)
+		body := bytes.NewBufferString(`{"event_id":1,"name":"Dinner","total_amount":1000,"currency":"BYN","split_type":"even","paid_by":10,"participants":[{"member_id":10,"amount":500}]}`)
 		req := httptest.NewRequest(http.MethodPost, "/bills", body)
 		req = testkit.WithUserSession(req, vo.UserID(5))
 		rec := httptest.NewRecorder()
 
 		uc.EXPECT().
 			CreateBill(mock.Anything, mock.MatchedBy(func(r billuc.CreateBillRq) bool {
-				return r.EventID == 1 && r.CreatedBy == vo.UserID(5) && len(r.Participants) == 1 && r.Participants[0].MemberID == 10
+				return r.EventID == 1 &&
+					r.CreatedBy == vo.UserID(5) &&
+					r.PaidBy == 10 &&
+					len(r.Participants) == 1 &&
+					r.Participants[0].MemberID == 10
 			})).
 			Return(int64(77), nil)
 
@@ -70,7 +74,7 @@ func TestBillController_CreateBill(t *testing.T) {
 	t.Run("usecase event not found", func(t *testing.T) {
 		uc := billusecasemock.NewMockUseCase(t)
 		ctrl := &controllerImpl{billUC: uc, logger: testkit.NewTestLogger()}
-		req := httptest.NewRequest(http.MethodPost, "/bills", bytes.NewBufferString(`{"event_id":1}`))
+		req := httptest.NewRequest(http.MethodPost, "/bills", bytes.NewBufferString(`{"event_id":1,"paid_by":1}`))
 		req = testkit.WithUserSession(req, vo.UserID(1))
 		rec := httptest.NewRecorder()
 
@@ -84,7 +88,7 @@ func TestBillController_CreateBill(t *testing.T) {
 	t.Run("usecase other error", func(t *testing.T) {
 		uc := billusecasemock.NewMockUseCase(t)
 		ctrl := &controllerImpl{billUC: uc, logger: testkit.NewTestLogger()}
-		req := httptest.NewRequest(http.MethodPost, "/bills", bytes.NewBufferString(`{"event_id":1}`))
+		req := httptest.NewRequest(http.MethodPost, "/bills", bytes.NewBufferString(`{"event_id":1,"paid_by":1}`))
 		req = testkit.WithUserSession(req, vo.UserID(1))
 		rec := httptest.NewRecorder()
 
@@ -112,6 +116,7 @@ func TestBillController_FetchEventBills(t *testing.T) {
 					EventID:      5,
 					Name:         "Dinner",
 					CreatedBy:    vo.UserID(2),
+					PaidBy:       10,
 					TotalAmount:  1000,
 					Participants: []domainbill.Participant{{MemberID: 10, Amount: 500}},
 				},
@@ -125,6 +130,7 @@ func TestBillController_FetchEventBills(t *testing.T) {
 		require.Len(t, resp, 1)
 		require.Equal(t, int64(1), resp[0].ID)
 		require.Equal(t, int64(10), resp[0].Participants[0].MemberID)
+		require.Equal(t, int64(10), resp[0].PaidBy)
 	})
 
 	t.Run("missing session", func(t *testing.T) {
