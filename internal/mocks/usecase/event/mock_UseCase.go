@@ -40,6 +40,74 @@ func (_m *MockUseCase) EXPECT() *MockUseCase_Expecter {
 	return &MockUseCase_Expecter{mock: &_m.Mock}
 }
 
+// CalculateSummary provides a mock function for the type MockUseCase
+func (_mock *MockUseCase) CalculateSummary(ctx context.Context, meetID int64) (*event.EventSummary, error) {
+	ret := _mock.Called(ctx, meetID)
+
+	if len(ret) == 0 {
+		panic("no return value specified for CalculateSummary")
+	}
+
+	var r0 *event.EventSummary
+	var r1 error
+	if returnFunc, ok := ret.Get(0).(func(context.Context, int64) (*event.EventSummary, error)); ok {
+		return returnFunc(ctx, meetID)
+	}
+	if returnFunc, ok := ret.Get(0).(func(context.Context, int64) *event.EventSummary); ok {
+		r0 = returnFunc(ctx, meetID)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*event.EventSummary)
+		}
+	}
+	if returnFunc, ok := ret.Get(1).(func(context.Context, int64) error); ok {
+		r1 = returnFunc(ctx, meetID)
+	} else {
+		r1 = ret.Error(1)
+	}
+	return r0, r1
+}
+
+// MockUseCase_CalculateSummary_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'CalculateSummary'
+type MockUseCase_CalculateSummary_Call struct {
+	*mock.Call
+}
+
+// CalculateSummary is a helper method to define mock.On call
+//   - ctx context.Context
+//   - meetID int64
+func (_e *MockUseCase_Expecter) CalculateSummary(ctx interface{}, meetID interface{}) *MockUseCase_CalculateSummary_Call {
+	return &MockUseCase_CalculateSummary_Call{Call: _e.mock.On("CalculateSummary", ctx, meetID)}
+}
+
+func (_c *MockUseCase_CalculateSummary_Call) Run(run func(ctx context.Context, meetID int64)) *MockUseCase_CalculateSummary_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		var arg0 context.Context
+		if args[0] != nil {
+			arg0 = args[0].(context.Context)
+		}
+		var arg1 int64
+		if args[1] != nil {
+			arg1 = args[1].(int64)
+		}
+		run(
+			arg0,
+			arg1,
+		)
+	})
+	return _c
+}
+
+func (_c *MockUseCase_CalculateSummary_Call) Return(eventSummary *event.EventSummary, err error) *MockUseCase_CalculateSummary_Call {
+	_c.Call.Return(eventSummary, err)
+	return _c
+}
+
+func (_c *MockUseCase_CalculateSummary_Call) RunAndReturn(run func(ctx context.Context, meetID int64) (*event.EventSummary, error)) *MockUseCase_CalculateSummary_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
 // CreateMeet provides a mock function for the type MockUseCase
 func (_mock *MockUseCase) CreateMeet(ctx context.Context, rq event.CreateMeetRq) (int64, error) {
 	ret := _mock.Called(ctx, rq)

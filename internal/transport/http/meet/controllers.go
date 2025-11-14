@@ -21,6 +21,9 @@ type Controller interface {
 
 	// GetMeetDetailsByID - получение инфы мита по айди
 	GetMeetDetailsByID(w http.ResponseWriter, r *http.Request)
+
+	// GetSummary - получение сбивки по ивенту
+	GetSummary(w http.ResponseWriter, r *http.Request)
 }
 
 type controllerImpl struct {
@@ -136,7 +139,7 @@ func (c *controllerImpl) FetchUserMeets(w http.ResponseWriter, r *http.Request) 
 // @Accept       json
 // @Produce      json
 // @Param        id   path      int  true  "ID мита"
-// @Success      200  {object}  Event
+// @Success      200  {object}  EventSummary
 // @Failure      401  {object}  hu.ErrorResponse
 // @Failure      404  {object}  hu.ErrorResponse
 // @Failure      500  {object}  hu.ErrorResponse
@@ -159,7 +162,7 @@ func (c *controllerImpl) GetMeetDetailsByID(w http.ResponseWriter, r *http.Reque
 			status = http.StatusForbidden
 		}
 		hu.RespondErrWithStatus(w, status, err.Error())
-		l.Error(fmt.Sprintf("meetController.CreateMeetRq error: %s", err))
+		l.Error(fmt.Sprintf("meetController.GetMeetDetailsByID error: %s", err))
 		return
 	}
 
@@ -170,6 +173,44 @@ func (c *controllerImpl) GetMeetDetailsByID(w http.ResponseWriter, r *http.Reque
 	}
 
 	hu.RespondJson(w, fromDomainEvent(*meet))
+}
+
+// GetSummary godoc
+// @Summary      Получение сбивки по ивенту
+// @Tags         meet
+// @Accept       json
+// @Produce      json
+// @Param        id   path      int  true  "ID мита"
+// @Success      200  {object}  EventSummary
+// @Failure      401  {object}  hu.ErrorResponse
+// @Failure      404  {object}  hu.ErrorResponse
+// @Failure      500  {object}  hu.ErrorResponse
+// @Security     SessionAuth
+// @Router       /meets/{id}/summary [get]
+func (c *controllerImpl) GetSummary(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+	l := c.l().With("method", "GetSummary")
+
+	meetID, err := hu.GetQueryParamInt(r, "id")
+	if err != nil {
+		hu.RespondErrWithStatus(w, http.StatusBadRequest, "invalid query param id")
+		return
+	}
+
+	summary, err := c.eventUC.CalculateSummary(ctx, meetID)
+	if err != nil {
+		status := http.StatusInternalServerError
+		if errors.Is(err, apperrors.ErrForbiden) {
+			status = http.StatusForbidden
+		} else if errors.Is(err, apperrors.ErrEventNotFound) {
+			status = http.StatusNotFound
+		}
+		hu.RespondErrWithStatus(w, status, err.Error())
+		l.Error(fmt.Sprintf("meetController.GetSummary error: %s", err))
+		return
+	}
+
+	hu.RespondJson(w, fromDomainSummary(*summary))
 }
 
 func (c *controllerImpl) l() *slog.Logger {

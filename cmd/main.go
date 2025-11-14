@@ -75,8 +75,8 @@ func main() {
 
 	// init use case
 	userUC := useruc.New(userSvc, sessionSvc)
-	meetUC := eventuc.New(eventSvc, userSvc)
 	billsUC := billuc.New(billSvc, eventSvc)
+	meetUC := eventuc.New(eventSvc, userSvc, billSvc)
 
 	// init http server
 	mw := middleware.NewMiddlewareManager(sessionSvc, l)

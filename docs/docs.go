@@ -338,7 +338,61 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/internal_transport_http_meet.Event"
+                            "$ref": "#/definitions/internal_transport_http_meet.EventSummary"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/billsplitter-monolith_internal_utils_http.ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/billsplitter-monolith_internal_utils_http.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/billsplitter-monolith_internal_utils_http.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/meets/{id}/summary": {
+            "get": {
+                "security": [
+                    {
+                        "SessionAuth": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "meet"
+                ],
+                "summary": "Получение сбивки по ивенту",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "ID мита",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/internal_transport_http_meet.EventSummary"
                         }
                     },
                     "401": {
@@ -1081,6 +1135,26 @@ const docTemplate = `{
                 }
             }
         },
+        "internal_transport_http_meet.Balance": {
+            "type": "object",
+            "properties": {
+                "balance": {
+                    "type": "integer"
+                },
+                "member_id": {
+                    "type": "integer"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "total_paid": {
+                    "type": "integer"
+                },
+                "total_share": {
+                    "type": "integer"
+                }
+            }
+        },
         "internal_transport_http_meet.CreateEventRq": {
             "type": "object",
             "properties": {
@@ -1136,6 +1210,23 @@ const docTemplate = `{
                 }
             }
         },
+        "internal_transport_http_meet.EventSummary": {
+            "type": "object",
+            "properties": {
+                "balances": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/internal_transport_http_meet.Balance"
+                    }
+                },
+                "settlements": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/internal_transport_http_meet.Settlement"
+                    }
+                }
+            }
+        },
         "internal_transport_http_meet.Member": {
             "type": "object",
             "properties": {
@@ -1147,6 +1238,20 @@ const docTemplate = `{
                 },
                 "username": {
                     "type": "string"
+                }
+            }
+        },
+        "internal_transport_http_meet.Settlement": {
+            "type": "object",
+            "properties": {
+                "amount": {
+                    "type": "integer"
+                },
+                "from_member_id": {
+                    "type": "integer"
+                },
+                "to_member_id": {
+                    "type": "integer"
                 }
             }
         },

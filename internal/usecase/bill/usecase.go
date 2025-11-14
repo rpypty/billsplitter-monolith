@@ -8,8 +8,6 @@ import (
 	domainevent "billsplitter-monolith/internal/domain/event"
 	vo "billsplitter-monolith/internal/domain/valueobject"
 	"billsplitter-monolith/internal/errors"
-	apperrors "billsplitter-monolith/internal/errors"
-	"billsplitter-monolith/internal/transport/http/middleware"
 )
 
 type UseCase interface {
@@ -41,12 +39,12 @@ func New(billSvc domainbill.Service, eventSvc domainevent.Service) *UseCaseImpl 
 }
 
 func (uc *UseCaseImpl) CreateBill(ctx context.Context, rq CreateBillRq) (int64, error) {
-	if err := uc.validateRequest(rq); err != nil {
+	eventModel, err := uc.getEvent(ctx, rq.EventID)
+	if err != nil {
 		return 0, err
 	}
 
-	eventModel, err := uc.getEvent(ctx, rq.EventID)
-	if err != nil {
+	if err := uc.validateRequest(rq); err != nil {
 		return 0, err
 	}
 
@@ -72,21 +70,9 @@ func (uc *UseCaseImpl) CreateBill(ctx context.Context, rq CreateBillRq) (int64, 
 }
 
 func (uc *UseCaseImpl) FetchEventBills(ctx context.Context, eventID int64) ([]domainbill.Bill, error) {
-	event, err := uc.getEvent(ctx, eventID)
+	// достаем ради валидации
+	_, err := uc.getEvent(ctx, eventID)
 	if err != nil {
-		return nil, err
-	}
-
-	if event == nil || event.ID == 0 {
-		return nil, nil
-	}
-
-	userID, err := middleware.ExtractUserFromContext(ctx)
-	if err != nil {
-		return nil, err
-	}
-
-	if err := uc.validateEvent(event, userID); err != nil {
 		return nil, err
 	}
 
@@ -99,28 +85,15 @@ func (uc *UseCaseImpl) getEvent(ctx context.Context, eventID int64) (*domaineven
 		return nil, err
 	}
 
-	if ev == nil {
+	if ev == nil || ev.ID == 0 {
 		return nil, errors.ErrEventNotFound
 	}
 
+	if err := domainevent.ValidateEventAccessBySession(ctx, ev); err != nil {
+		return nil, err
+	}
+
 	return ev, nil
-}
-
-func (uc *UseCaseImpl) validateEvent(ev *domainevent.Event, sessionUserID vo.UserID) error {
-	userMemberIndex := make(map[vo.UserID]struct{}, len(ev.Members))
-	for _, m := range ev.Members {
-		if m.UserID == nil {
-			continue
-		}
-		userMemberIndex[*m.UserID] = struct{}{}
-	}
-
-	// проверяем есть ли инициатор запроса в этом ивенте
-	if _, ok := userMemberIndex[sessionUserID]; !ok {
-		return apperrors.ErrForbiden
-	}
-
-	return nil
 }
 
 func (uc *UseCaseImpl) validateParticipants(ev *domainevent.Event, rq CreateBillRq) error {

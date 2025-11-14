@@ -28,3 +28,23 @@ type Event struct {
 	EventDate       *time.Time `json:"event_date,omitempty"`
 	DeletedAt       *time.Time `json:"deleted_at,omitempty"`
 }
+
+type EventSummary struct {
+	Balances    []Balance    `json:"balances"`
+	Settlements []Settlement `json:"settlements"`
+}
+
+type Balance struct {
+	MemberID   int64  `json:"member_id"`
+	UserID     *int64 `json:"user_id"`
+	Name       string `json:"name"`
+	TotalPaid  int64  `json:"total_paid"`
+	TotalShare int64  `json:"total_share"`
+	Balance    int64  `json:"balance"`
+}
+
+type Settlement struct {
+	FromMemberID int64 `json:"from_member_id"`
+	ToMemberID   int64 `json:"to_member_id"`
+	Amount       int64 `json:"amount"`
+}

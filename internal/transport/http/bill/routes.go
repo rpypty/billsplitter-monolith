@@ -2,6 +2,7 @@ package bill
 
 import (
 	"billsplitter-monolith/internal/transport/http/middleware"
+
 	"github.com/go-chi/chi/v5"
 )
 

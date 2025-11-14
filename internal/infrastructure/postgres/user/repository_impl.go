@@ -47,7 +47,7 @@ func (s *RepositoryImpl) GetByTelegramID(ctx context.Context, telegramID int64) 
 
 	err := s.db.
 		WithContext(ctx).
-		Where("(extra->>'telegram_id')::int = ?", telegramID).
+		Where("(extra->>'telegram_id')::bigint = ?", telegramID).
 		First(&user).Error
 	if err != nil {
 		if stderrors.Is(err, gorm.ErrRecordNotFound) {

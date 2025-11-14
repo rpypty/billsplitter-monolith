@@ -1,11 +1,12 @@
 package meet
 
 import (
-	domain "billsplitter-monolith/internal/domain/event"
+	domainevent "billsplitter-monolith/internal/domain/event"
+	"billsplitter-monolith/internal/usecase/event"
 	"billsplitter-monolith/internal/utils"
 )
 
-func fromDomainEvent(meet domain.Event) Event {
+func fromDomainEvent(meet domainevent.Event) Event {
 	outMembers := make([]Member, 0, len(meet.Members))
 
 	for _, member := range meet.Members {
@@ -27,5 +28,33 @@ func fromDomainEvent(meet domain.Event) Event {
 		UpdatedAt:       meet.UpdatedAt,
 		EventDate:       meet.EventDate,
 		DeletedAt:       meet.DeletedAt,
+	}
+}
+
+func fromDomainSummary(summary event.EventSummary) EventSummary {
+	outBalances := make([]Balance, 0, len(summary.Balances))
+	for _, balance := range summary.Balances {
+		outBalances = append(outBalances, Balance{
+			MemberID:   balance.MemberID,
+			UserID:     utils.UserIDToInt64(balance.UserID),
+			Name:       balance.Name,
+			TotalPaid:  balance.TotalPaid,
+			TotalShare: balance.TotalShare,
+			Balance:    balance.Balance,
+		})
+	}
+
+	outSettlements := make([]Settlement, 0, len(summary.Settlements))
+	for _, settlement := range summary.Settlements {
+		outSettlements = append(outSettlements, Settlement{
+			FromMemberID: settlement.FromMemberID,
+			ToMemberID:   settlement.ToMemberID,
+			Amount:       settlement.Amount,
+		})
+	}
+
+	return EventSummary{
+		Balances:    outBalances,
+		Settlements: outSettlements,
 	}
 }
