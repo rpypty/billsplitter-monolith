@@ -1152,6 +1152,9 @@ const docTemplate = `{
                 },
                 "total_share": {
                     "type": "integer"
+                },
+                "user_id": {
+                    "type": "integer"
                 }
             }
         },
