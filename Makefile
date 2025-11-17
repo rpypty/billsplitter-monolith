@@ -40,6 +40,9 @@ mocks:
 test:
 	go test -v -count=1 ./...
 
+teste2e:
+	go test -v -count=1 -tags=e2e ./...
+
 # Посмотреть тестовое покрытие
 test-cover:
 	go test -covermode=atomic -coverpkg=./... -coverprofile=coverage.out $(TEST_PKGS)
