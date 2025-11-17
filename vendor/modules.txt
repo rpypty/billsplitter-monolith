@@ -44,6 +44,10 @@ github.com/go-playground/universal-translator
 # github.com/go-playground/validator/v10 v10.26.0
 ## explicit; go 1.20
 github.com/go-playground/validator/v10
+# github.com/go-resty/resty/v2 v2.16.5
+## explicit; go 1.20
+github.com/go-resty/resty/v2
+github.com/go-resty/resty/v2/shellescape
 # github.com/go-viper/mapstructure/v2 v2.2.1
 ## explicit; go 1.18
 github.com/go-viper/mapstructure/v2
@@ -183,6 +187,7 @@ golang.org/x/crypto/sha3
 ## explicit; go 1.18
 golang.org/x/net/html
 golang.org/x/net/html/atom
+golang.org/x/net/publicsuffix
 golang.org/x/net/webdav
 golang.org/x/net/webdav/internal/xml
 # golang.org/x/sync v0.11.0

@@ -7,7 +7,7 @@ import (
 )
 
 var (
-	configPath = "."
+	configPath = "../"
 	debug      = false
 )
 
