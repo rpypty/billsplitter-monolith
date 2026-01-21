@@ -97,6 +97,21 @@ func (r *RepositoryImpl) GetByID(ctx context.Context, eventID int64) (*domain.Ev
 	return eventToDomain(entityEvent), nil
 }
 
+func (r *RepositoryImpl) GetByPublicUUID(ctx context.Context, publicUUID string) (*domain.Event, error) {
+	entityEvent := &eventEntity{}
+
+	err := r.db.
+		WithContext(ctx).
+		Preload("Members").
+		Find(&entityEvent, "public_uuid = ?", publicUUID).
+		Error
+	if err != nil {
+		return nil, err
+	}
+
+	return eventToDomain(entityEvent), nil
+}
+
 func (r *RepositoryImpl) AssignMemberUser(ctx context.Context, eventID int64, memberID int64, userID vo.UserID) error {
 	errWrap := getErrWrapper("AssignMemberUser")
 

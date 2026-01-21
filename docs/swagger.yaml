@@ -169,6 +169,8 @@ definitions:
         type: array
       name:
         type: string
+      public_uuid:
+        type: string
       status:
         type: string
       type:
@@ -581,6 +583,44 @@ paths:
       security:
       - SessionAuth: []
       summary: Получение сбивки по ивенту
+      tags:
+      - meet
+  /meets/invite/{uuid}:
+    get:
+      consumes:
+      - application/json
+      parameters:
+      - description: Invite UUID (v4)
+        in: path
+        name: uuid
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/internal_transport_http_meet.Event'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/billsplitter-monolith_internal_utils_http.ErrorResponse'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/billsplitter-monolith_internal_utils_http.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/billsplitter-monolith_internal_utils_http.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/billsplitter-monolith_internal_utils_http.ErrorResponse'
+      security:
+      - SessionAuth: []
+      summary: Получение инфы по ивенту по invite uuid
       tags:
       - meet
   /payment_methods:

@@ -18,6 +18,7 @@ type UseCase interface {
 	CreateMeet(ctx context.Context, rq CreateMeetRq) (int64, error)
 	FetchUserMeets(ctx context.Context, userID vo.UserID) ([]event.Event, error)
 	GetMeetByID(ctx context.Context, meetID int64) (*event.Event, error)
+	GetMeetByInviteUUID(ctx context.Context, publicUUID string) (*event.Event, error)
 	CalculateSummary(ctx context.Context, meetID int64) (*EventSummary, error)
 	AssignMemberToUser(ctx context.Context, meetID int64, memberID int64, userID vo.UserID) error
 }
@@ -89,6 +90,23 @@ func (uc *UseCaseImpl) GetMeetByID(ctx context.Context, meetID int64) (*event.Ev
 
 	if err := event.ValidateEventAccessBySession(ctx, ev); err != nil {
 		return nil, err
+	}
+
+	return ev, nil
+}
+
+func (uc *UseCaseImpl) GetMeetByInviteUUID(ctx context.Context, publicUUID string) (*event.Event, error) {
+	if publicUUID == "" {
+		return nil, errors.ErrValidationFunc("public_uuid must be provided")
+	}
+
+	ev, err := uc.eventSvc.GetByPublicUUID(ctx, publicUUID)
+	if err != nil {
+		return nil, err
+	}
+
+	if ev == nil || ev.ID == 0 {
+		return nil, errors.ErrEventNotFound
 	}
 
 	return ev, nil

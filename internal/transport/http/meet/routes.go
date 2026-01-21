@@ -13,6 +13,8 @@ func InitRoutes(r chi.Router, ctrl Controller, mw middleware.Manager) {
 
 		r.With(mw.Auth()).Get("/", ctrl.FetchUserMeets)
 
+		r.With(mw.Auth()).Get("/invite/{uuid}", ctrl.GetMeetDetailsByInviteUUID)
+
 		r.With(mw.Auth()).Get("/{id}", ctrl.GetMeetDetailsByID)
 
 		r.With(mw.Auth()).Put("/{id}/assign", ctrl.AssignMemberToUser)

@@ -11,6 +11,8 @@ import (
 	"billsplitter-monolith/internal/transport/http/middleware"
 	"billsplitter-monolith/internal/usecase/event"
 	hu "billsplitter-monolith/internal/utils/http"
+	"github.com/go-chi/chi/v5"
+	"github.com/google/uuid"
 )
 
 type Controller interface {
@@ -22,6 +24,9 @@ type Controller interface {
 
 	// GetMeetDetailsByID - получение инфы мита по айди
 	GetMeetDetailsByID(w http.ResponseWriter, r *http.Request)
+
+	// GetMeetDetailsByInviteUUID - получение инфы мита по invite uuid
+	GetMeetDetailsByInviteUUID(w http.ResponseWriter, r *http.Request)
 
 	// GetSummary - получение сбивки по ивенту
 	GetSummary(w http.ResponseWriter, r *http.Request)
@@ -173,6 +178,52 @@ func (c *controllerImpl) GetMeetDetailsByID(w http.ResponseWriter, r *http.Reque
 	if meet == nil {
 		hu.RespondErrWithStatus(w, http.StatusNotFound, "meet not found")
 		l.Error(fmt.Sprintf("meetController.GetMeetDetailsByID error: %s", err))
+		return
+	}
+
+	hu.RespondJson(w, fromDomainEvent(*meet))
+}
+
+// GetMeetDetailsByInviteUUID godoc
+// @Summary      Получение инфы по ивенту по invite uuid
+// @Tags         meet
+// @Accept       json
+// @Produce      json
+// @Param        uuid   path      string  true  "Invite UUID (v4)"
+// @Success      200    {object}  Event
+// @Failure      400    {object}  hu.ErrorResponse
+// @Failure      403    {object}  hu.ErrorResponse
+// @Failure      404    {object}  hu.ErrorResponse
+// @Failure      500    {object}  hu.ErrorResponse
+// @Security     SessionAuth
+// @Router       /meets/invite/{uuid} [get]
+func (c *controllerImpl) GetMeetDetailsByInviteUUID(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+	l := c.l().With("method", "GetMeetDetailsByInviteUUID")
+
+	rawUUID := chi.URLParam(r, "uuid")
+	parsedUUID, err := uuid.Parse(rawUUID)
+	if err != nil || parsedUUID.Version() != 4 {
+		hu.RespondErrWithStatus(w, http.StatusBadRequest, "invalid invite uuid")
+		return
+	}
+
+	meet, err := c.eventUC.GetMeetByInviteUUID(ctx, rawUUID)
+	if err != nil {
+		status := http.StatusInternalServerError
+		if errors.Is(err, apperrors.ErrForbiden) {
+			status = http.StatusForbidden
+		} else if errors.Is(err, apperrors.ErrEventNotFound) {
+			status = http.StatusNotFound
+		}
+		hu.RespondErrWithStatus(w, status, err.Error())
+		l.Error(fmt.Sprintf("meetController.GetMeetDetailsByInviteUUID error: %s", err))
+		return
+	}
+
+	if meet == nil {
+		hu.RespondErrWithStatus(w, http.StatusNotFound, "meet not found")
+		l.Error("meetController.GetMeetDetailsByInviteUUID meet not found")
 		return
 	}
 

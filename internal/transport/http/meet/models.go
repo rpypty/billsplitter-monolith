@@ -22,6 +22,7 @@ type Member struct {
 
 type Event struct {
 	ID              int64      `json:"ID"`
+	PublicUUID      string     `json:"public_uuid"`
 	Name            string     `json:"name"`
 	CreatedByUserID int64      `json:"created_by_user_id"`
 	Members         []Member   `json:"members"`

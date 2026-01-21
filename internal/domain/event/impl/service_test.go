@@ -41,6 +41,8 @@ func TestService_Create(t *testing.T) {
 
 		repo.EXPECT().
 			Create(mock.Anything, mock.MatchedBy(func(ev event.Event) bool {
+				require.NotEmpty(t, ev.PublicUUID)
+				ev.PublicUUID = ""
 				require.Equal(t, expectedEvent, ev)
 				return true
 			})).
