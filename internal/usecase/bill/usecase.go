@@ -118,12 +118,12 @@ func (uc *UseCaseImpl) validateParticipants(ev *domainevent.Event, rq CreateBill
 
 	// проверяем что инициатор запроса вообще принадлежит этому инвета
 	if !createdByBelogsToEvent {
-		return errors.ErrValidationFunc(fmt.Sprintf("created_by %d does not belong to event %d", rq.CreatedBy, ev.ID))
+		return errors.ErrValidationFunc(fmt.Sprintf("created_by (user_id) %d does not belong to event %d", rq.CreatedBy, ev.ID))
 	}
 
 	// проверяем что юзер который платит принадлежит этому ивенту
 	if _, ok := memberIndex[int64(rq.PaidBy)]; !ok {
-		return errors.ErrValidationFunc(fmt.Sprintf("paid_by %d does not belong to event %d", rq.PaidBy, ev.ID))
+		return errors.ErrValidationFunc(fmt.Sprintf("paid_by (member_id) %d does not belong to event %d", rq.PaidBy, ev.ID))
 	}
 
 	// проверяем что все юзеры в чеке принадлежат этому ивенту
