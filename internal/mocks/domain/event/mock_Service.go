@@ -480,3 +480,72 @@ func (_c *MockService_Update_Call) RunAndReturn(run func(ctx context.Context, rq
 	_c.Call.Return(run)
 	return _c
 }
+
+// AssignMemberUser provides a mock function for the type MockService
+func (_mock *MockService) AssignMemberUser(ctx context.Context, eventID int64, memberID int64, userID valueobject.UserID) error {
+	ret := _mock.Called(ctx, eventID, memberID, userID)
+
+	if len(ret) == 0 {
+		panic("no return value specified for AssignMemberUser")
+	}
+
+	var r0 error
+	if returnFunc, ok := ret.Get(0).(func(context.Context, int64, int64, valueobject.UserID) error); ok {
+		r0 = returnFunc(ctx, eventID, memberID, userID)
+	} else {
+		r0 = ret.Error(0)
+	}
+	return r0
+}
+
+// MockService_AssignMemberUser_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'AssignMemberUser'
+type MockService_AssignMemberUser_Call struct {
+	*mock.Call
+}
+
+// AssignMemberUser is a helper method to define mock.On call
+//   - ctx context.Context
+//   - eventID int64
+//   - memberID int64
+//   - userID valueobject.UserID
+func (_e *MockService_Expecter) AssignMemberUser(ctx interface{}, eventID interface{}, memberID interface{}, userID interface{}) *MockService_AssignMemberUser_Call {
+	return &MockService_AssignMemberUser_Call{Call: _e.mock.On("AssignMemberUser", ctx, eventID, memberID, userID)}
+}
+
+func (_c *MockService_AssignMemberUser_Call) Run(run func(ctx context.Context, eventID int64, memberID int64, userID valueobject.UserID)) *MockService_AssignMemberUser_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		var arg0 context.Context
+		if args[0] != nil {
+			arg0 = args[0].(context.Context)
+		}
+		var arg1 int64
+		if args[1] != nil {
+			arg1 = args[1].(int64)
+		}
+		var arg2 int64
+		if args[2] != nil {
+			arg2 = args[2].(int64)
+		}
+		var arg3 valueobject.UserID
+		if args[3] != nil {
+			arg3 = args[3].(valueobject.UserID)
+		}
+		run(
+			arg0,
+			arg1,
+			arg2,
+			arg3,
+		)
+	})
+	return _c
+}
+
+func (_c *MockService_AssignMemberUser_Call) Return(err error) *MockService_AssignMemberUser_Call {
+	_c.Call.Return(err)
+	return _c
+}
+
+func (_c *MockService_AssignMemberUser_Call) RunAndReturn(run func(ctx context.Context, eventID int64, memberID int64, userID valueobject.UserID) error) *MockService_AssignMemberUser_Call {
+	_c.Call.Return(run)
+	return _c
+}

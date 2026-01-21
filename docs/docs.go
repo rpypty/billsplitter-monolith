@@ -362,6 +362,76 @@ const docTemplate = `{
                 }
             }
         },
+        "/meets/{id}/assign": {
+            "put": {
+                "security": [
+                    {
+                        "SessionAuth": []
+                    }
+                ],
+                "description": "user_id берется из сессии",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "meet"
+                ],
+                "summary": "Связать участника с текущим пользователем",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "ID мита",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "member_id",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/internal_transport_http_meet.SelectMemberRq"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/billsplitter-monolith_internal_utils_http.ResponseOK"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/billsplitter-monolith_internal_utils_http.ErrorResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/billsplitter-monolith_internal_utils_http.ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/billsplitter-monolith_internal_utils_http.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/billsplitter-monolith_internal_utils_http.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
         "/meets/{id}/summary": {
             "get": {
                 "security": [
@@ -1241,6 +1311,14 @@ const docTemplate = `{
                 },
                 "username": {
                     "type": "string"
+                }
+            }
+        },
+        "internal_transport_http_meet.SelectMemberRq": {
+            "type": "object",
+            "properties": {
+                "member_id": {
+                    "type": "integer"
                 }
             }
         },

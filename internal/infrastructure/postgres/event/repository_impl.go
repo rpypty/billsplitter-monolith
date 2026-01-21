@@ -2,10 +2,12 @@ package event
 
 import (
 	"context"
+	"errors"
 	"fmt"
 
 	domain "billsplitter-monolith/internal/domain/event"
 	vo "billsplitter-monolith/internal/domain/valueobject"
+	apperrors "billsplitter-monolith/internal/errors"
 
 	"gorm.io/gorm"
 )
@@ -93,4 +95,37 @@ func (r *RepositoryImpl) GetByID(ctx context.Context, eventID int64) (*domain.Ev
 	}
 
 	return eventToDomain(entityEvent), nil
+}
+
+func (r *RepositoryImpl) AssignMemberUser(ctx context.Context, eventID int64, memberID int64, userID vo.UserID) error {
+	errWrap := getErrWrapper("AssignMemberUser")
+
+	result := r.db.WithContext(ctx).
+		Model(&memberEntity{}).
+		Where("id = ? AND event_id = ? AND user_id IS NULL", memberID, eventID).
+		Update("user_id", int64(userID))
+	if result.Error != nil {
+		return errWrap(result.Error)
+	}
+
+	if result.RowsAffected == 0 {
+		var member memberEntity
+		err := r.db.WithContext(ctx).
+			Select("id", "user_id").
+			Where("id = ? AND event_id = ?", memberID, eventID).
+			Take(&member).
+			Error
+		if err != nil {
+			if errors.Is(err, gorm.ErrRecordNotFound) {
+				return apperrors.ErrValidationFunc("member not found in event")
+			}
+			return errWrap(err)
+		}
+
+		if member.UserID != nil {
+			return apperrors.ErrValidationFunc("member already assigned")
+		}
+	}
+
+	return nil
 }

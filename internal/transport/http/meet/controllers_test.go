@@ -296,3 +296,108 @@ func TestMeetController_GetSummary(t *testing.T) {
 		require.Equal(t, http.StatusNotFound, rec.Code)
 	})
 }
+
+func TestMeetController_AssignMemberToUser(t *testing.T) {
+	t.Run("success", func(t *testing.T) {
+		eventUC := eventucmock.NewMockUseCase(t)
+		ctrl := &controllerImpl{eventUC: eventUC, logger: testkit.NewTestLogger()}
+		req := httptest.NewRequest(http.MethodPut, "/meets/1/assign", bytes.NewBufferString(`{"member_id":10}`))
+		req = testkit.WithUserSession(req, vo.UserID(5))
+		req = testkit.WithRouteParams(req, map[string]string{"id": "1"})
+		rec := httptest.NewRecorder()
+
+		eventUC.EXPECT().
+			AssignMemberToUser(mock.Anything, int64(1), int64(10), vo.UserID(5)).
+			Return(nil)
+
+		ctrl.AssignMemberToUser(rec, req)
+
+		require.Equal(t, http.StatusOK, rec.Code)
+		var resp hu.ResponseOK
+		require.NoError(t, json.Unmarshal(rec.Body.Bytes(), &resp))
+		require.Equal(t, "OK", resp.Message)
+	})
+
+	t.Run("missing session", func(t *testing.T) {
+		eventUC := eventucmock.NewMockUseCase(t)
+		ctrl := &controllerImpl{eventUC: eventUC, logger: testkit.NewTestLogger()}
+		req := httptest.NewRequest(http.MethodPut, "/meets/1/assign", bytes.NewBufferString(`{"member_id":10}`))
+		req = testkit.WithRouteParams(req, map[string]string{"id": "1"})
+		rec := httptest.NewRecorder()
+
+		ctrl.AssignMemberToUser(rec, req)
+
+		require.Equal(t, http.StatusBadRequest, rec.Code)
+	})
+
+	t.Run("nil session", func(t *testing.T) {
+		eventUC := eventucmock.NewMockUseCase(t)
+		ctrl := &controllerImpl{eventUC: eventUC, logger: testkit.NewTestLogger()}
+		req := httptest.NewRequest(http.MethodPut, "/meets/1/assign", bytes.NewBufferString(`{"member_id":10}`))
+		req = testkit.WithSession(req, nil)
+		req = testkit.WithRouteParams(req, map[string]string{"id": "1"})
+		rec := httptest.NewRecorder()
+
+		ctrl.AssignMemberToUser(rec, req)
+
+		require.Equal(t, http.StatusUnauthorized, rec.Code)
+	})
+
+	t.Run("invalid id", func(t *testing.T) {
+		ctrl := &controllerImpl{eventUC: eventucmock.NewMockUseCase(t), logger: testkit.NewTestLogger()}
+		req := httptest.NewRequest(http.MethodPut, "/meets/foo/assign", bytes.NewBufferString(`{"member_id":10}`))
+		req = testkit.WithUserSession(req, vo.UserID(5))
+		req = testkit.WithRouteParams(req, map[string]string{"id": "foo"})
+		rec := httptest.NewRecorder()
+
+		ctrl.AssignMemberToUser(rec, req)
+
+		require.Equal(t, http.StatusBadRequest, rec.Code)
+	})
+
+	t.Run("decode error", func(t *testing.T) {
+		ctrl := &controllerImpl{eventUC: eventucmock.NewMockUseCase(t), logger: testkit.NewTestLogger()}
+		req := httptest.NewRequest(http.MethodPut, "/meets/1/assign", bytes.NewBufferString(`invalid`))
+		req = testkit.WithUserSession(req, vo.UserID(5))
+		req = testkit.WithRouteParams(req, map[string]string{"id": "1"})
+		rec := httptest.NewRecorder()
+
+		ctrl.AssignMemberToUser(rec, req)
+
+		require.Equal(t, http.StatusBadRequest, rec.Code)
+	})
+
+	t.Run("validation error", func(t *testing.T) {
+		eventUC := eventucmock.NewMockUseCase(t)
+		ctrl := &controllerImpl{eventUC: eventUC, logger: testkit.NewTestLogger()}
+		req := httptest.NewRequest(http.MethodPut, "/meets/1/assign", bytes.NewBufferString(`{"member_id":10}`))
+		req = testkit.WithUserSession(req, vo.UserID(5))
+		req = testkit.WithRouteParams(req, map[string]string{"id": "1"})
+		rec := httptest.NewRecorder()
+
+		eventUC.EXPECT().
+			AssignMemberToUser(mock.Anything, int64(1), int64(10), vo.UserID(5)).
+			Return(appErrors.ErrValidationFunc("member already assigned"))
+
+		ctrl.AssignMemberToUser(rec, req)
+
+		require.Equal(t, http.StatusBadRequest, rec.Code)
+	})
+
+	t.Run("not found", func(t *testing.T) {
+		eventUC := eventucmock.NewMockUseCase(t)
+		ctrl := &controllerImpl{eventUC: eventUC, logger: testkit.NewTestLogger()}
+		req := httptest.NewRequest(http.MethodPut, "/meets/1/assign", bytes.NewBufferString(`{"member_id":10}`))
+		req = testkit.WithUserSession(req, vo.UserID(5))
+		req = testkit.WithRouteParams(req, map[string]string{"id": "1"})
+		rec := httptest.NewRecorder()
+
+		eventUC.EXPECT().
+			AssignMemberToUser(mock.Anything, int64(1), int64(10), vo.UserID(5)).
+			Return(appErrors.ErrEventNotFound)
+
+		ctrl.AssignMemberToUser(rec, req)
+
+		require.Equal(t, http.StatusNotFound, rec.Code)
+	})
+}

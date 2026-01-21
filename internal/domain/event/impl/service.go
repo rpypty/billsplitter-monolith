@@ -83,3 +83,7 @@ func (s *ServiceImpl) FetchByUserID(ctx context.Context, userID vo.UserID) ([]ev
 func (s *ServiceImpl) GetByID(ctx context.Context, billID int64) (*event.Event, error) {
 	return s.repo.GetByID(ctx, billID)
 }
+
+func (s *ServiceImpl) AssignMemberUser(ctx context.Context, eventID int64, memberID int64, userID vo.UserID) error {
+	return s.repo.AssignMemberUser(ctx, eventID, memberID, userID)
+}

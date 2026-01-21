@@ -19,6 +19,7 @@ type UseCase interface {
 	FetchUserMeets(ctx context.Context, userID vo.UserID) ([]event.Event, error)
 	GetMeetByID(ctx context.Context, meetID int64) (*event.Event, error)
 	CalculateSummary(ctx context.Context, meetID int64) (*EventSummary, error)
+	AssignMemberToUser(ctx context.Context, meetID int64, memberID int64, userID vo.UserID) error
 }
 
 type UseCaseImpl struct {
@@ -115,6 +116,39 @@ func (uc *UseCaseImpl) CalculateSummary(ctx context.Context, meetID int64) (*Eve
 		Balances:    balances,
 		Settlements: settlements,
 	}, nil
+}
+
+func (uc *UseCaseImpl) AssignMemberToUser(ctx context.Context, meetID int64, memberID int64, userID vo.UserID) error {
+	if meetID <= 0 {
+		return errors.ErrValidationFunc("meet_id must be provided")
+	}
+	if memberID <= 0 {
+		return errors.ErrValidationFunc("member_id must be provided")
+	}
+
+	meet, err := uc.eventSvc.GetByID(ctx, meetID)
+	if err != nil {
+		return err
+	}
+	if meet == nil || meet.ID == 0 {
+		return errors.ErrEventNotFound
+	}
+
+	var selectedMember *event.Member
+	for i := range meet.Members {
+		if meet.Members[i].ID == memberID {
+			selectedMember = &meet.Members[i]
+			break
+		}
+	}
+	if selectedMember == nil {
+		return errors.ErrValidationFunc(fmt.Sprintf("member_id %d does not belong to event %d", memberID, meetID))
+	}
+	if selectedMember.UserID != nil {
+		return errors.ErrValidationFunc("member already assigned")
+	}
+
+	return uc.eventSvc.AssignMemberUser(ctx, meetID, memberID, userID)
 }
 
 func buildBalances(ev event.Event, bills []bill.Bill) []Balance {

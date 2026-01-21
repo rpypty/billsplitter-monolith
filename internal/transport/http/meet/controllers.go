@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log/slog"
 	"net/http"
+	"strings"
 
 	apperrors "billsplitter-monolith/internal/errors"
 	"billsplitter-monolith/internal/transport/http/middleware"
@@ -24,6 +25,9 @@ type Controller interface {
 
 	// GetSummary - получение сбивки по ивенту
 	GetSummary(w http.ResponseWriter, r *http.Request)
+
+	// AssignMemberToUser - связывает участника с текущим пользователем
+	AssignMemberToUser(w http.ResponseWriter, r *http.Request)
 }
 
 type controllerImpl struct {
@@ -211,6 +215,74 @@ func (c *controllerImpl) GetSummary(w http.ResponseWriter, r *http.Request) {
 	}
 
 	hu.RespondJson(w, fromDomainSummary(*summary))
+}
+
+// AssignMemberToUser godoc
+// @Summary      Связать участника с текущим пользователем
+// @Description  user_id берется из сессии
+// @Tags         meet
+// @Accept       json
+// @Produce      json
+// @Param        id       path      int             true  "ID мита"
+// @Param        request  body      SelectMemberRq  true  "member_id"
+// @Success      200      {object}  hu.ResponseOK
+// @Failure      400      {object}  hu.ErrorResponse
+// @Failure      401      {object}  hu.ErrorResponse
+// @Failure      404      {object}  hu.ErrorResponse
+// @Failure      500      {object}  hu.ErrorResponse
+// @Security     SessionAuth
+// @Router       /meets/{id}/assign [put]
+func (c *controllerImpl) AssignMemberToUser(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+	l := c.l().With("method", "AssignMemberToUser")
+
+	sessionInfo, err := middleware.SessionFromContext(ctx)
+	if err != nil {
+		hu.RespondErrWithStatus(w, http.StatusBadRequest, err.Error())
+		l.Error(err.Error())
+		return
+	}
+
+	if sessionInfo == nil {
+		hu.RespondErrWithStatus(w, http.StatusUnauthorized, "Unauthorized")
+		l.Error("User not authorized")
+		return
+	}
+
+	meetID, err := hu.GetQueryParamInt(r, "id")
+	if err != nil {
+		hu.RespondErrWithStatus(w, http.StatusBadRequest, "invalid query param id")
+		return
+	}
+
+	rq, err := hu.DecodeReq[SelectMemberRq](r)
+	if err != nil {
+		hu.RespondErrWithStatus(w, http.StatusBadRequest, err.Error())
+		return
+	}
+
+	if rq.MemberID == 0 {
+		hu.RespondErrWithStatus(w, http.StatusBadRequest, "member_id is required")
+		return
+	}
+
+	err = c.eventUC.AssignMemberToUser(ctx, meetID, rq.MemberID, sessionInfo.UserID)
+	if err != nil {
+		status := http.StatusInternalServerError
+		switch {
+		case errors.Is(err, apperrors.ErrEventNotFound):
+			status = http.StatusNotFound
+		case strings.HasPrefix(err.Error(), "validation error"):
+			status = http.StatusBadRequest
+		case errors.Is(err, apperrors.ErrForbiden):
+			status = http.StatusForbidden
+		}
+		hu.RespondErrWithStatus(w, status, err.Error())
+		l.Error(fmt.Sprintf("meetController.AssignMemberToUser error: %s", err))
+		return
+	}
+
+	hu.RespondOK(w)
 }
 
 func (c *controllerImpl) l() *slog.Logger {
