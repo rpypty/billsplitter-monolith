@@ -10,6 +10,10 @@ type CreateEventRq struct {
 	Members   []string   `json:"members"`
 }
 
+type SelectMemberRq struct {
+	MemberID int64 `json:"member_id"`
+}
+
 type Member struct {
 	ID       int64  `json:"ID"`
 	UserID   *int64 `json:"user_id"`

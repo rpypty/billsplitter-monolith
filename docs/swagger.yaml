@@ -196,6 +196,11 @@ definitions:
       username:
         type: string
     type: object
+  internal_transport_http_meet.SelectMemberRq:
+    properties:
+      member_id:
+        type: integer
+    type: object
   internal_transport_http_meet.Settlement:
     properties:
       amount:
@@ -497,6 +502,51 @@ paths:
       security:
       - SessionAuth: []
       summary: Получение инфы по ивенту
+      tags:
+      - meet
+  /meets/{id}/assign:
+    put:
+      consumes:
+      - application/json
+      description: user_id берется из сессии
+      parameters:
+      - description: ID мита
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: member_id
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/internal_transport_http_meet.SelectMemberRq'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/billsplitter-monolith_internal_utils_http.ResponseOK'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/billsplitter-monolith_internal_utils_http.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/billsplitter-monolith_internal_utils_http.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/billsplitter-monolith_internal_utils_http.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/billsplitter-monolith_internal_utils_http.ErrorResponse'
+      security:
+      - SessionAuth: []
+      summary: Связать участника с текущим пользователем
       tags:
       - meet
   /meets/{id}/summary:

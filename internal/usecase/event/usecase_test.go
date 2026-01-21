@@ -536,3 +536,145 @@ func TestUseCase_CalculateSummary(t *testing.T) {
 		require.Empty(t, summary.Settlements)
 	})
 }
+
+func TestUseCase_AssignMemberToUser(t *testing.T) {
+	t.Run("success", func(t *testing.T) {
+		eventSvc := eventmock.NewMockService(t)
+		userSvc := usermock.NewMockService(t)
+		billSvc := billmock.NewMockService(t)
+		uc := New(eventSvc, userSvc, billSvc)
+		ctx := context.Background()
+
+		meetID := int64(10)
+		memberID := int64(5)
+		userID := vo.UserID(7)
+		meet := &domainevent.Event{
+			ID: meetID,
+			Members: []domainevent.Member{
+				{ID: memberID},
+			},
+		}
+
+		eventSvc.EXPECT().
+			GetByID(mock.Anything, meetID).
+			Return(meet, nil)
+		eventSvc.EXPECT().
+			AssignMemberUser(mock.Anything, meetID, memberID, userID).
+			Return(nil)
+
+		err := uc.AssignMemberToUser(ctx, meetID, memberID, userID)
+
+		require.NoError(t, err)
+	})
+
+	t.Run("meet id required", func(t *testing.T) {
+		eventSvc := eventmock.NewMockService(t)
+		userSvc := usermock.NewMockService(t)
+		billSvc := billmock.NewMockService(t)
+		uc := New(eventSvc, userSvc, billSvc)
+
+		err := uc.AssignMemberToUser(context.Background(), 0, 1, vo.UserID(1))
+
+		require.ErrorContains(t, err, "validation error")
+	})
+
+	t.Run("member id required", func(t *testing.T) {
+		eventSvc := eventmock.NewMockService(t)
+		userSvc := usermock.NewMockService(t)
+		billSvc := billmock.NewMockService(t)
+		uc := New(eventSvc, userSvc, billSvc)
+
+		err := uc.AssignMemberToUser(context.Background(), 1, 0, vo.UserID(1))
+
+		require.ErrorContains(t, err, "validation error")
+	})
+
+	t.Run("event not found", func(t *testing.T) {
+		eventSvc := eventmock.NewMockService(t)
+		userSvc := usermock.NewMockService(t)
+		billSvc := billmock.NewMockService(t)
+		uc := New(eventSvc, userSvc, billSvc)
+		ctx := context.Background()
+
+		eventSvc.EXPECT().
+			GetByID(mock.Anything, int64(1)).
+			Return(nil, nil)
+
+		err := uc.AssignMemberToUser(ctx, 1, 2, vo.UserID(3))
+
+		require.ErrorIs(t, err, appErrors.ErrEventNotFound)
+	})
+
+	t.Run("member not in event", func(t *testing.T) {
+		eventSvc := eventmock.NewMockService(t)
+		userSvc := usermock.NewMockService(t)
+		billSvc := billmock.NewMockService(t)
+		uc := New(eventSvc, userSvc, billSvc)
+		ctx := context.Background()
+
+		meet := &domainevent.Event{
+			ID: 1,
+			Members: []domainevent.Member{
+				{ID: 10},
+			},
+		}
+
+		eventSvc.EXPECT().
+			GetByID(mock.Anything, int64(1)).
+			Return(meet, nil)
+
+		err := uc.AssignMemberToUser(ctx, 1, 2, vo.UserID(3))
+
+		require.ErrorContains(t, err, "validation error")
+	})
+
+	t.Run("member already assigned", func(t *testing.T) {
+		eventSvc := eventmock.NewMockService(t)
+		userSvc := usermock.NewMockService(t)
+		billSvc := billmock.NewMockService(t)
+		uc := New(eventSvc, userSvc, billSvc)
+		ctx := context.Background()
+
+		meet := &domainevent.Event{
+			ID: 1,
+			Members: []domainevent.Member{
+				{ID: 10, UserID: utils.Ptr(vo.UserID(5))},
+			},
+		}
+
+		eventSvc.EXPECT().
+			GetByID(mock.Anything, int64(1)).
+			Return(meet, nil)
+
+		err := uc.AssignMemberToUser(ctx, 1, 10, vo.UserID(3))
+
+		require.ErrorContains(t, err, "validation error")
+	})
+
+	t.Run("assign error", func(t *testing.T) {
+		eventSvc := eventmock.NewMockService(t)
+		userSvc := usermock.NewMockService(t)
+		billSvc := billmock.NewMockService(t)
+		uc := New(eventSvc, userSvc, billSvc)
+		ctx := context.Background()
+
+		meet := &domainevent.Event{
+			ID: 1,
+			Members: []domainevent.Member{
+				{ID: 10},
+			},
+		}
+		assignErr := stderrors.New("assign failed")
+
+		eventSvc.EXPECT().
+			GetByID(mock.Anything, int64(1)).
+			Return(meet, nil)
+		eventSvc.EXPECT().
+			AssignMemberUser(mock.Anything, int64(1), int64(10), vo.UserID(3)).
+			Return(assignErr)
+
+		err := uc.AssignMemberToUser(ctx, 1, 10, vo.UserID(3))
+
+		require.ErrorIs(t, err, assignErr)
+	})
+}

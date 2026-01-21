@@ -309,3 +309,72 @@ func (_c *MockUseCase_GetMeetByID_Call) RunAndReturn(run func(ctx context.Contex
 	_c.Call.Return(run)
 	return _c
 }
+
+// AssignMemberToUser provides a mock function for the type MockUseCase
+func (_mock *MockUseCase) AssignMemberToUser(ctx context.Context, meetID int64, memberID int64, userID valueobject.UserID) error {
+	ret := _mock.Called(ctx, meetID, memberID, userID)
+
+	if len(ret) == 0 {
+		panic("no return value specified for AssignMemberToUser")
+	}
+
+	var r0 error
+	if returnFunc, ok := ret.Get(0).(func(context.Context, int64, int64, valueobject.UserID) error); ok {
+		r0 = returnFunc(ctx, meetID, memberID, userID)
+	} else {
+		r0 = ret.Error(0)
+	}
+	return r0
+}
+
+// MockUseCase_AssignMemberToUser_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'AssignMemberToUser'
+type MockUseCase_AssignMemberToUser_Call struct {
+	*mock.Call
+}
+
+// AssignMemberToUser is a helper method to define mock.On call
+//   - ctx context.Context
+//   - meetID int64
+//   - memberID int64
+//   - userID valueobject.UserID
+func (_e *MockUseCase_Expecter) AssignMemberToUser(ctx interface{}, meetID interface{}, memberID interface{}, userID interface{}) *MockUseCase_AssignMemberToUser_Call {
+	return &MockUseCase_AssignMemberToUser_Call{Call: _e.mock.On("AssignMemberToUser", ctx, meetID, memberID, userID)}
+}
+
+func (_c *MockUseCase_AssignMemberToUser_Call) Run(run func(ctx context.Context, meetID int64, memberID int64, userID valueobject.UserID)) *MockUseCase_AssignMemberToUser_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		var arg0 context.Context
+		if args[0] != nil {
+			arg0 = args[0].(context.Context)
+		}
+		var arg1 int64
+		if args[1] != nil {
+			arg1 = args[1].(int64)
+		}
+		var arg2 int64
+		if args[2] != nil {
+			arg2 = args[2].(int64)
+		}
+		var arg3 valueobject.UserID
+		if args[3] != nil {
+			arg3 = args[3].(valueobject.UserID)
+		}
+		run(
+			arg0,
+			arg1,
+			arg2,
+			arg3,
+		)
+	})
+	return _c
+}
+
+func (_c *MockUseCase_AssignMemberToUser_Call) Return(err error) *MockUseCase_AssignMemberToUser_Call {
+	_c.Call.Return(err)
+	return _c
+}
+
+func (_c *MockUseCase_AssignMemberToUser_Call) RunAndReturn(run func(ctx context.Context, meetID int64, memberID int64, userID valueobject.UserID) error) *MockUseCase_AssignMemberToUser_Call {
+	_c.Call.Return(run)
+	return _c
+}
