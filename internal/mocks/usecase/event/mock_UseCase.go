@@ -270,6 +270,74 @@ func (_mock *MockUseCase) GetMeetByID(ctx context.Context, meetID int64) (*event
 	return r0, r1
 }
 
+// GetMeetByInviteUUID provides a mock function for the type MockUseCase
+func (_mock *MockUseCase) GetMeetByInviteUUID(ctx context.Context, publicUUID string) (*event0.Event, error) {
+	ret := _mock.Called(ctx, publicUUID)
+
+	if len(ret) == 0 {
+		panic("no return value specified for GetMeetByInviteUUID")
+	}
+
+	var r0 *event0.Event
+	var r1 error
+	if returnFunc, ok := ret.Get(0).(func(context.Context, string) (*event0.Event, error)); ok {
+		return returnFunc(ctx, publicUUID)
+	}
+	if returnFunc, ok := ret.Get(0).(func(context.Context, string) *event0.Event); ok {
+		r0 = returnFunc(ctx, publicUUID)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*event0.Event)
+		}
+	}
+	if returnFunc, ok := ret.Get(1).(func(context.Context, string) error); ok {
+		r1 = returnFunc(ctx, publicUUID)
+	} else {
+		r1 = ret.Error(1)
+	}
+	return r0, r1
+}
+
+// MockUseCase_GetMeetByInviteUUID_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'GetMeetByInviteUUID'
+type MockUseCase_GetMeetByInviteUUID_Call struct {
+	*mock.Call
+}
+
+// GetMeetByInviteUUID is a helper method to define mock.On call
+//   - ctx context.Context
+//   - publicUUID string
+func (_e *MockUseCase_Expecter) GetMeetByInviteUUID(ctx interface{}, publicUUID interface{}) *MockUseCase_GetMeetByInviteUUID_Call {
+	return &MockUseCase_GetMeetByInviteUUID_Call{Call: _e.mock.On("GetMeetByInviteUUID", ctx, publicUUID)}
+}
+
+func (_c *MockUseCase_GetMeetByInviteUUID_Call) Run(run func(ctx context.Context, publicUUID string)) *MockUseCase_GetMeetByInviteUUID_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		var arg0 context.Context
+		if args[0] != nil {
+			arg0 = args[0].(context.Context)
+		}
+		var arg1 string
+		if args[1] != nil {
+			arg1 = args[1].(string)
+		}
+		run(
+			arg0,
+			arg1,
+		)
+	})
+	return _c
+}
+
+func (_c *MockUseCase_GetMeetByInviteUUID_Call) Return(event1 *event0.Event, err error) *MockUseCase_GetMeetByInviteUUID_Call {
+	_c.Call.Return(event1, err)
+	return _c
+}
+
+func (_c *MockUseCase_GetMeetByInviteUUID_Call) RunAndReturn(run func(ctx context.Context, publicUUID string) (*event0.Event, error)) *MockUseCase_GetMeetByInviteUUID_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
 // MockUseCase_GetMeetByID_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'GetMeetByID'
 type MockUseCase_GetMeetByID_Call struct {
 	*mock.Call

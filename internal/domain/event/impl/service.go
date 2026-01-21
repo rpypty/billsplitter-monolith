@@ -5,6 +5,7 @@ import (
 
 	"billsplitter-monolith/internal/domain/event"
 	vo "billsplitter-monolith/internal/domain/valueobject"
+	"billsplitter-monolith/internal/utils"
 )
 
 var _ event.Service = (*ServiceImpl)(nil)
@@ -24,6 +25,7 @@ func (s *ServiceImpl) Create(ctx context.Context, rq event.CreateEventRq) (int64
 
 	billID, err := s.repo.Create(ctx, event.Event{
 		Name:            rq.Name,
+		PublicUUID:      utils.NewUUIDv4(),
 		CreatedByUserID: rq.CreatorUserID,
 		Status:          event.StatusDraft,
 		Type:            event.TypeMeet,
@@ -82,6 +84,10 @@ func (s *ServiceImpl) FetchByUserID(ctx context.Context, userID vo.UserID) ([]ev
 
 func (s *ServiceImpl) GetByID(ctx context.Context, billID int64) (*event.Event, error) {
 	return s.repo.GetByID(ctx, billID)
+}
+
+func (s *ServiceImpl) GetByPublicUUID(ctx context.Context, publicUUID string) (*event.Event, error) {
+	return s.repo.GetByPublicUUID(ctx, publicUUID)
 }
 
 func (s *ServiceImpl) AssignMemberUser(ctx context.Context, eventID int64, memberID int64, userID vo.UserID) error {

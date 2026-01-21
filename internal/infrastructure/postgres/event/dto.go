@@ -17,6 +17,7 @@ import (
 type eventEntity struct {
 	gorm.Model
 	ID              int64      `gorm:"column:id"`
+	PublicUUID      string     `gorm:"column:public_uuid;type:uuid"`
 	Name            string     `gorm:"column:name"`
 	EventType       string     `gorm:"column:event_type"`
 	Status          string     `gorm:"column:status"`
@@ -40,6 +41,7 @@ func eventFromDomain(d *domain.Event) *eventEntity {
 
 	return &eventEntity{
 		ID:              d.ID,
+		PublicUUID:      d.PublicUUID,
 		Name:            d.Name,
 		EventType:       string(d.Type),
 		Status:          string(d.Status),
@@ -64,6 +66,7 @@ func eventToDomain(e *eventEntity) *domain.Event {
 
 	out := domain.Event{
 		ID:              e.ID,
+		PublicUUID:      e.PublicUUID,
 		Name:            e.Name,
 		Members:         domainMembers,
 		CreatedByUserID: vo.UserID(e.CreatedByUserID),

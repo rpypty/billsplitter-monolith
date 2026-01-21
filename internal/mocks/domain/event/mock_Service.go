@@ -321,6 +321,74 @@ func (_mock *MockService) GetByID(ctx context.Context, eventID int64) (*event.Ev
 	return r0, r1
 }
 
+// GetByPublicUUID provides a mock function for the type MockService
+func (_mock *MockService) GetByPublicUUID(ctx context.Context, publicUUID string) (*event.Event, error) {
+	ret := _mock.Called(ctx, publicUUID)
+
+	if len(ret) == 0 {
+		panic("no return value specified for GetByPublicUUID")
+	}
+
+	var r0 *event.Event
+	var r1 error
+	if returnFunc, ok := ret.Get(0).(func(context.Context, string) (*event.Event, error)); ok {
+		return returnFunc(ctx, publicUUID)
+	}
+	if returnFunc, ok := ret.Get(0).(func(context.Context, string) *event.Event); ok {
+		r0 = returnFunc(ctx, publicUUID)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*event.Event)
+		}
+	}
+	if returnFunc, ok := ret.Get(1).(func(context.Context, string) error); ok {
+		r1 = returnFunc(ctx, publicUUID)
+	} else {
+		r1 = ret.Error(1)
+	}
+	return r0, r1
+}
+
+// MockService_GetByPublicUUID_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'GetByPublicUUID'
+type MockService_GetByPublicUUID_Call struct {
+	*mock.Call
+}
+
+// GetByPublicUUID is a helper method to define mock.On call
+//   - ctx context.Context
+//   - publicUUID string
+func (_e *MockService_Expecter) GetByPublicUUID(ctx interface{}, publicUUID interface{}) *MockService_GetByPublicUUID_Call {
+	return &MockService_GetByPublicUUID_Call{Call: _e.mock.On("GetByPublicUUID", ctx, publicUUID)}
+}
+
+func (_c *MockService_GetByPublicUUID_Call) Run(run func(ctx context.Context, publicUUID string)) *MockService_GetByPublicUUID_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		var arg0 context.Context
+		if args[0] != nil {
+			arg0 = args[0].(context.Context)
+		}
+		var arg1 string
+		if args[1] != nil {
+			arg1 = args[1].(string)
+		}
+		run(
+			arg0,
+			arg1,
+		)
+	})
+	return _c
+}
+
+func (_c *MockService_GetByPublicUUID_Call) Return(event1 *event.Event, err error) *MockService_GetByPublicUUID_Call {
+	_c.Call.Return(event1, err)
+	return _c
+}
+
+func (_c *MockService_GetByPublicUUID_Call) RunAndReturn(run func(ctx context.Context, publicUUID string) (*event.Event, error)) *MockService_GetByPublicUUID_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
 // MockService_GetByID_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'GetByID'
 type MockService_GetByID_Call struct {
 	*mock.Call

@@ -19,6 +19,7 @@ func fromDomainEvent(meet domainevent.Event) Event {
 
 	return Event{
 		ID:              meet.ID,
+		PublicUUID:      meet.PublicUUID,
 		Name:            meet.Name,
 		CreatedByUserID: int64(meet.CreatedByUserID),
 		Members:         outMembers,

@@ -27,6 +27,8 @@ type Service interface {
 
 	GetByID(ctx context.Context, eventID int64) (*Event, error)
 
+	GetByPublicUUID(ctx context.Context, publicUUID string) (*Event, error)
+
 	// AssignMemberUser - связывает участника с пользователем
 	AssignMemberUser(ctx context.Context, eventID int64, memberID int64, userID vo.UserID) error
 }
@@ -39,6 +41,8 @@ type Repository interface {
 	FetchByUserID(ctx context.Context, userID vo.UserID) ([]Event, error)
 
 	GetByID(ctx context.Context, eventID int64) (*Event, error)
+
+	GetByPublicUUID(ctx context.Context, publicUUID string) (*Event, error)
 
 	AssignMemberUser(ctx context.Context, eventID int64, memberID int64, userID vo.UserID) error
 }

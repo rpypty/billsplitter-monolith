@@ -37,6 +37,7 @@ type CreateEventRq struct {
 
 type Event struct {
 	ID              int64
+	PublicUUID      string
 	Name            string
 	CreatedByUserID vo.UserID
 	Members         []Member // Members - участников, обогощаются на уровне UseCase
