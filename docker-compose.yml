@@ -2,7 +2,7 @@ version: '3.8'
 
 services:
   postgres:
-    image: postgres:15
+    image: ghcr.io/your-org/postgres:15
     container_name: billsplitter-db
     restart: unless-stopped
     environment:

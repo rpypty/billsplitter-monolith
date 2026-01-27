@@ -6,16 +6,16 @@ gop:
 	go mod tidy && go mod vendor && go vet ./...
 
 compose:
-	docker-compose up --build -d
+	docker compose up --build -d
 
 compose-down:
-	docker-compose down
+	docker compose down
 
 run:
 	go run ./cmd/main.go
 
 deploy:
-	docker-compose -f docker-compose-deploy.yml up --build
+	docker compose -f docker-compose-deploy.yml up --build
 
 # Запускает миграции на postgres
 migrate:
