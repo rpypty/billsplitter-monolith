@@ -65,9 +65,13 @@ func (r *RepositoryImpl) FetchByUserID(ctx context.Context, userID vo.UserID) ([
 
 	err := r.db.
 		WithContext(ctx).
+		Model(&eventEntity{}).
+		Joins("JOIN members ON members.event_id = events.id").
+		Where("members.user_id = ?", int64(userID)).
 		Preload("Members").
-		Order("created_at DESC").
-		Find(&entityEvents, "created_by_user_id = ?", int64(userID)).
+		Order("events.created_at DESC").
+		Distinct("events.*").
+		Find(&entityEvents).
 		Error
 	if err != nil {
 		return nil, err

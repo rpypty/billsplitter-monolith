@@ -24,6 +24,7 @@ type TestSDK interface {
 	FetchUserMeets(ctx context.Context) (*[]meet.Event, error)
 	GetMeetDetailsByID(ctx context.Context, meetID int64) (*meet.Event, error)
 	GetMeetSummary(ctx context.Context, meetID int64) (*meet.EventSummary, error)
+	AssignMemberToUser(ctx context.Context, meetID int64, memberID int64) (*hu.ResponseOK, error)
 
 	// bill
 	CreateBill(ctx context.Context, rq bill.CreateBillRq) (*hu.ResponseID, error)
@@ -149,6 +150,22 @@ func (s *SDK) GetMeetSummary(ctx context.Context, meetID int64) (*meet.EventSumm
 	}
 
 	var resp meet.EventSummary
+	if err := json.Unmarshal(rawResp.Body(), &resp); err != nil {
+		return nil, err
+	}
+
+	return &resp, nil
+}
+
+func (s *SDK) AssignMemberToUser(ctx context.Context, meetID int64, memberID int64) (*hu.ResponseOK, error) {
+	rawResp, err := s.newRequest(ctx).
+		SetBody(&meet.SelectMemberRq{MemberID: memberID}).
+		Put(fmt.Sprintf("/meets/%d/assign", meetID))
+	if err != nil {
+		return nil, err
+	}
+
+	var resp hu.ResponseOK
 	if err := json.Unmarshal(rawResp.Body(), &resp); err != nil {
 		return nil, err
 	}

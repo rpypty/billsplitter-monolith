@@ -114,6 +114,34 @@ func TestE2E_HappyPath(t *testing.T) {
 		require.NotZero(t, creatorMemberID)
 		require.NotZero(t, secondaryMemberID)
 
+		secondSDK := sdk.New(baseURL)
+		secondLoginReq := auth.LoginTelegramReq{
+			Username:   fmt.Sprintf("meet_member_%d", unix),
+			FirstName:  "Meet",
+			LastName:   fmt.Sprintf("Member_%d", unix),
+			TelegramID: unix + 1,
+		}
+
+		_, err = secondSDK.Auth(ctx, secondLoginReq)
+		require.NoError(t, err)
+
+		_, err = secondSDK.AssignMemberToUser(ctx, createdMeet.ID, secondaryMemberID)
+		require.NoError(t, err)
+
+		secondUserMeets, err := secondSDK.FetchUserMeets(ctx)
+		require.NoError(t, err)
+		require.NotNil(t, secondUserMeets)
+
+		var secondUserMeetFound bool
+		for i := range *secondUserMeets {
+			if (*secondUserMeets)[i].ID == createdMeet.ID {
+				secondUserMeetFound = true
+				break
+			}
+		}
+
+		require.True(t, secondUserMeetFound)
+
 		billReq := bill.CreateBillRq{
 			EventID:     createdMeet.ID,
 			Name:        fmt.Sprintf("Test bill %d", unix),
