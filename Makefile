@@ -14,6 +14,9 @@ compose-down:
 run:
 	go run ./cmd/main.go
 
+deploy:
+	docker-compose -f docker-compose-deploy.yml up --build
+
 # Запускает миграции на postgres
 migrate:
 	goose -dir internal/db/migrations postgres $(PG_DSN) up
