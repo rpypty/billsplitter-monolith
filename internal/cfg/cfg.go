@@ -42,10 +42,10 @@ func IsDebug() bool {
 	return debug
 }
 
-func LoadConfig() (Config, error) {
+func LoadConfig(file, extension string) (Config, error) {
 	v := viper.New()
-	v.SetConfigName("config")
-	v.SetConfigType("yml")
+	v.SetConfigName(file)
+	v.SetConfigType(extension)
 	v.AddConfigPath(configPath)
 
 	if err := v.ReadInConfig(); err != nil {

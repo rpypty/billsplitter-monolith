@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"flag"
 	"fmt"
 	"log/slog"
 	"os"
@@ -107,12 +108,25 @@ func main() {
 }
 
 func mustLoadCfg(l *slog.Logger) cfg.Config {
-	c, err := cfg.LoadConfig()
+	isProd := flag.Bool("prod", false, "use prod config - config.prod.yml")
+	flag.Parse()
+
+	isProdValue := false
+	if isProd != nil {
+		isProdValue = *isProd
+	}
+
+	configFileName := "config"
+	if isProdValue {
+		configFileName = "config.prod"
+	}
+
+	c, err := cfg.LoadConfig(configFileName, "yaml")
 	if err != nil {
 		utils.LogFatalf(l, "failed to load config: %v", err)
 	}
 
-	l.WithGroup("main").Info("config loaded successfully")
+	l.WithGroup("main").Info(fmt.Sprintf("config loaded successfully (prod config: %v)", isProdValue))
 
 	return c
 }
