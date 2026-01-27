@@ -4,3 +4,4 @@ bin
 .testCoverage.txt
 cmd/__debug_bin*
 .vscode
+billsplitter

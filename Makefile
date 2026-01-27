@@ -14,8 +14,12 @@ compose-down:
 run:
 	go run ./cmd/main.go
 
-deploy:
-	docker compose -f docker-compose-deploy.yml up --build
+vps-back-deploy:
+	go build -o billsplitter cmd/main.go
+	nohup ./billsplitter -prod > /var/log/billsplitter.log 2>&1 &
+
+vps-back-stop:
+	pkill -9 -f "./billsplitter -prod"
 
 # Запускает миграции на postgres
 migrate:

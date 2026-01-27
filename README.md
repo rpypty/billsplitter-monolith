@@ -95,3 +95,24 @@ swag init --parseDependency --parseInternal -g ./cmd/main.go
 ```bash
 make pre-commit
 ```
+
+
+## Как деплоить на VPS
+
+При попытке поднимать инфру и приложение в докере возникает ошибка:
+```
+failed to solve: failed to fetch anonymous token: Get "https://auth.docker.io/token?scope=repository%3Alibrary%2Falpine%3Apull&service=registry.docker.io": net/http: TLS handshake timeout
+```
+
+Это скорее всего связано с региональными ограничениями - впс московский
+
+Будет запускать приложение без докера просто в фоне:
+```bash
+go build -o billsplitter cmd/main.go # билдим бинарь
+nohup ./billsplitter -prod > /var/log/billsplitter.log 2>&1 & # запускаем в фоне
+```
+
+Чтобы дропнуть процесс:
+```bash
+pkill -9 -f "./billsplitter -prod" # остановить процесс
+```
