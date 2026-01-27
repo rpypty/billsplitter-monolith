@@ -67,7 +67,7 @@ make compose
 #### 1. Установка
 
 ```bash
-go install github.com/swaggo/swag/cmd/swag@latest
+GOPROXY=direct go install github.com/swaggo/swag/cmd/swag@latest
 swag --version
 ```
 
