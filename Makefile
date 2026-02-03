@@ -1,4 +1,11 @@
-PG_DSN="postgres://admin:admin@localhost:55433/bill_splitter?sslmode=disable&connect_timeout=5"
+PG_USER ?= admin
+PG_PASSWORD ?= admin
+PG_HOST ?= localhost
+PG_PORT ?= 55433
+PG_DB ?= bill_splitter
+PG_SSLMODE ?= disable
+
+PG_DSN := "postgres://$(PG_USER):$(PG_PASSWORD)@$(PG_HOST):$(PG_PORT)/$(PG_DB)?sslmode=$(PG_SSLMODE)&connect_timeout=5"
 TEST_PKGS := $(shell go list ./... | grep -v mocks)
 
 # Обновление зависимостей, проверка кода и обновление вендор папки
