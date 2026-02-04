@@ -68,11 +68,13 @@ services:
       PG_HOST: postgres
       PG_PORT: 5432
 
-    entrypoint: ["/bin/sh", "-c"]
-    command: >
-      go install github.com/pressly/goose/v3/cmd/goose@latest &&
-      goose -dir internal/db/migrations postgres
-      "postgres://$PG_USER:$PG_PASSWORD@$PG_HOST:$PG_PORT/$PG_DATABASE?sslmode=$PG_SSLMODE&connect_timeout=$PG_CONNECT_TIMEOUT" up
+    command:
+      - /bin/sh
+      - -c
+      - >-
+        go install github.com/pressly/goose/v3/cmd/goose@latest &&
+        goose -dir internal/db/migrations postgres
+        "postgres://$$PG_USER:$$PG_PASSWORD@$$PG_HOST:$$PG_PORT/$$PG_DATABASE?sslmode=$$PG_SSLMODE&connect_timeout=$$PG_CONNECT_TIMEOUT" up
 
 volumes:
   pgdata:
