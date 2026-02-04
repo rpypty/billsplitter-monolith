@@ -1,11 +1,20 @@
-debug: true # включает дебаг логи и в http ответы прокидывает подробные ошибки 
+debug: true # включает дебаг логи и подробные http ошибки
+
 server:
   http:
-    port: ":5001" # порт на котором запускается http сервер
+    port: ":5001" # порт, на котором запускается HTTP сервер
 
 telegram:
-  bot_token: # токен бота для нотификаций
+  bot_token: "" # токен бота для нотификаций (лучше через ENV)
 
 storage:
   postgres:
-    dsn: "postgres://admin:admin@localhost:55433/bill_splitter?sslmode=disable&connect_timeout=5"
+    host: "localhost"
+    port: 5432
+    database: "bill_splitter"
+    user: "admin"
+    password: ""           # не хранить в репе
+    sslmode: "disable"
+    connect_timeout: 5     # секунды
+    max_open_conns: 10
+    max_idle_conns: 5

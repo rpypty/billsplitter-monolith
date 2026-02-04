@@ -23,9 +23,9 @@ sudo chmod 755 /opt/billsplitter/billsplitter                 # сделать �
 ### 3*. Копируем конфиг (при необходимости)
 
 ```bash
-cp ./config.prod.yml /opt/billsplitter/config.prod.yml                   # копируем конфиг
-sudo chown billsplitter:billsplitter /opt/billsplitter/config.prod.yml  # владелец сервисный юзер
-sudo chmod 600 /opt/billsplitter/config.prod.yml                        # доступ только владельцу
+cp ./config.yml /opt/billsplitter/config.yml                   # копируем конфиг
+sudo chown billsplitter:billsplitter /opt/billsplitter/config.yml  # владелец сервисный юзер
+sudo chmod 600 /opt/billsplitter/config.yml                        # доступ только владельцу
 ```
 
 
@@ -85,9 +85,9 @@ sudo systemctl disable --now billsplitter                   # выключить
 
 ## Депой из скрипта 
 
-В репозитории в папке /deploy есть скрипт deploy.sh
+В репозитории в папке /deploy/systemd есть скрипт deploy.sh
 
 ```bash
-sudo chmod +x ./deploy/deploy.sh    # делаем файл исполняемым
-sudo ./deploy/deploy.sh             # запускаем скрипт деплоя
+sudo chmod +x ./deploy/systemd/deploy.sh    # делаем файл исполняемым
+sudo ./deploy/systemd/deploy.sh             # запускаем скрипт деплоя
 ```

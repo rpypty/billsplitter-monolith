@@ -5,7 +5,7 @@
 Перед запуском надо поднять инфру и накатить миграции (как это сделать в написано в соответствующих разделах инструкции)
 
 ```bash
-make compose # поднимает инфру в докере 
+make compose-infra-up # поднимает инфру в докере
 make migrate # применяет миграции
 make run     # запуска go app
 ```
@@ -16,7 +16,8 @@ make run     # запуска go app
 
 ## Конифг сервиса
 
-Конфиг хранится в корне репозитория в файле config.yml
+Конфиг хранится в корне репозитория в файле config.yml.
+Можно переопределять значения через `.env` (приоритет выше, чем у `config.yml`). Список переменных есть в `.env.example`.
 
 ## Работа с БД
 ```bash
@@ -51,15 +52,36 @@ make migrate       # Прогоняет миграции
 make migrate-force # Применяет миграции даже в случае непоследовательного применения файлов
 ```
 
+#### Миграции в проде (deploy/docker-compose/docker-compose.yml)
+Поднимаем всё через compose, затем накатываем миграции с хоста (goose установлен на сервере):
+```bash
+docker compose -f deploy/docker-compose/docker-compose.yml up -d
+# если другие креды/порт — переопредели переменными
+PG_HOST=127.0.0.1 PG_PORT=55433 PG_USER=admin PG_PASSWORD=admin PG_DB=bill_splitter make migrate
+```
+Либо можно прогнать миграции через отдельный сервис:
+```bash
+docker compose -f deploy/docker-compose/docker-compose.yml run --rm migrate
+```
+
 ## Инфраструктура, docker
 
-Инфра поднимается через docker-compose.yml в корне репозитория
+Compose-файлы:
+- `deploy/docker-compose/docker-compose.yml` — полный запуск (приложение + БД)
+- `docker-compose-infra.yml` — только инфраструктура (БД, для локального дебага)
 
 #### 4. Поднять инфру
 ```bash
-docker-compose up --build -d
+docker compose -f docker-compose-infra.yml up -d
 # или
-make compose
+make compose-infra-up
+```
+
+#### 5. Поднять всё (прод-сценарий)
+```bash
+docker compose -f deploy/docker-compose/docker-compose.yml up --build -d
+# или
+make compose-up
 ```
 
 ## Swagger
@@ -109,10 +131,10 @@ failed to solve: failed to fetch anonymous token: Get "https://auth.docker.io/to
 Будет запускать приложение без докера просто в фоне:
 ```bash
 go build -o billsplitter cmd/main.go # билдим бинарь
-nohup ./billsplitter -prod > /var/log/billsplitter.log 2>&1 & # запускаем в фоне
+nohup ./billsplitter > /var/log/billsplitter.log 2>&1 & # запускаем в фоне
 ```
 
 Чтобы дропнуть процесс:
 ```bash
-pkill -9 -f "./billsplitter -prod" # остановить процесс
+pkill -9 -f "./billsplitter" # остановить процесс
 ```

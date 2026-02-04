@@ -1,4 +1,4 @@
-version: "3.8"
+name: billsplitter-infra
 
 services:
   postgres:
@@ -14,7 +14,7 @@ services:
       # PGDATA: /var/lib/postgresql/data/pgdata
 
     ports:
-      - "55433:5432"
+      - "127.0.0.1:55433:5432"
 
     volumes:
       - pgdata:/var/lib/postgresql/data

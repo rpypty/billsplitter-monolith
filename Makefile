@@ -8,25 +8,48 @@ PG_SSLMODE ?= disable
 PG_DSN := "postgres://$(PG_USER):$(PG_PASSWORD)@$(PG_HOST):$(PG_PORT)/$(PG_DB)?sslmode=$(PG_SSLMODE)&connect_timeout=5"
 TEST_PKGS := $(shell go list ./... | grep -v mocks)
 
+
+
+# 1. Golang
+
 # Обновление зависимостей, проверка кода и обновление вендор папки
-gop:
-	go mod tidy && go mod vendor && go vet ./...
-
-compose:
-	docker compose up --build -d
-
-compose-down:
-	docker compose down
-
 run:
 	go run ./cmd/main.go
 
-vps-back-deploy:
-	go build -o billsplitter cmd/main.go
-	nohup ./billsplitter -prod > /var/log/billsplitter.log 2>&1 &
+gop:
+	go mod tidy && go mod vendor && go vet ./...
 
-vps-back-stop:
-	pkill -9 -f "./billsplitter -prod"
+
+
+# 2. Docker
+
+# поднимает инфру + бэк
+compose-up:
+	docker compose -f deploy/docker-compose/docker-compose.yml up --build -d
+
+# прогоняет миграции для постгри внутри контейнера (зависимость goose поднимается в докере)
+compose-migrate:
+	docker compose -f deploy/docker-compose/docker-compose.yml run --rm migrate
+
+# посмотреть логи бэка поднятого в контейнере
+compose-logs:
+	docker compose -f deploy/docker-compose/docker-compose.yml logs -f app
+
+# снести инфру + бэк
+compose-down:
+	docker compose -f deploy/docker-compose/docker-compose.yml down
+
+
+# поднимает только инфру, для дева/дебага бэка
+compose-infra-up:
+	docker compose -f docker-compose-infra.yml up -d
+
+compose-infra-down:
+	docker compose -f docker-compose-infra.yml down
+
+
+
+# 3. Migrations 
 
 # Запускает миграции на postgres
 migrate:
@@ -35,6 +58,14 @@ migrate:
 # Запускает миграции даже в случае непоследовательного применения файлов
 migrate-force:
 	goose -allow-missing -dir internal/db/migrations postgres $(PG_DSN) up
+
+
+
+# 4. Утилиты
+
+# Генерация моков
+mocks:
+	mockery --config .mockery.yaml
 
 # Генерация swagger документации
 swagger:
@@ -45,10 +76,6 @@ pre-commit:
 	make mocks
 	make test
 	make swagger
-
-# Генерация моков
-mocks:
-	mockery --config .mockery.yaml
 
 # Запуск тестов
 test:

@@ -1,0 +1,78 @@
+name: billsplitter
+
+services:
+  postgres:
+    image: postgres:15-alpine
+    container_name: billsplitter-db
+    restart: unless-stopped
+
+    environment:
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: admin
+      POSTGRES_DB: bill_splitter
+      # опционально, чтобы клиентам было проще:
+      # PGDATA: /var/lib/postgresql/data/pgdata
+
+    ports:
+      - "127.0.0.1:55433:5432"
+
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      # если включишь PGDATA выше, то лучше так:
+      # - pgdata:/var/lib/postgresql/data/pgdata
+
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB} -h 127.0.0.1 -p 5432"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+      start_period: 5s
+
+  app:
+    build:
+      context: ../..
+      dockerfile: Dockerfile
+    container_name: billsplitter-app
+    restart: unless-stopped
+    command: ["/opt/app/billsplitter"]
+
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+    env_file:
+      - ../../.env
+    environment:
+      PG_HOST: postgres
+      PG_PORT: 5432
+
+    ports:
+      - "5001:5001"
+
+  migrate:
+    image: golang:1.24-alpine
+    container_name: billsplitter-migrate
+    restart: "no"
+
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+    working_dir: /app
+    volumes:
+      - ../..:/app
+
+    env_file:
+      - ../../.env
+    environment:
+      PG_HOST: postgres
+      PG_PORT: 5432
+
+    entrypoint: ["/bin/sh", "-c"]
+    command: >
+      go install github.com/pressly/goose/v3/cmd/goose@latest &&
+      goose -dir internal/db/migrations postgres
+      "postgres://$PG_USER:$PG_PASSWORD@$PG_HOST:$PG_PORT/$PG_DATABASE?sslmode=$PG_SSLMODE&connect_timeout=$PG_CONNECT_TIMEOUT" up
+
+volumes:
+  pgdata:

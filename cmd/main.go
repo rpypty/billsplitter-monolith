@@ -2,7 +2,6 @@ package main
 
 import (
 	"context"
-	"flag"
 	"fmt"
 	"log/slog"
 	"os"
@@ -108,25 +107,12 @@ func main() {
 }
 
 func mustLoadCfg(l *slog.Logger) cfg.Config {
-	isProd := flag.Bool("prod", false, "use prod config - config.prod.yml")
-	flag.Parse()
-
-	isProdValue := false
-	if isProd != nil {
-		isProdValue = *isProd
-	}
-
-	configFileName := "config"
-	if isProdValue {
-		configFileName = "config.prod"
-	}
-
-	c, err := cfg.LoadConfig(configFileName, "yaml")
+	c, err := cfg.LoadConfig("config", "yaml")
 	if err != nil {
 		utils.LogFatalf(l, "failed to load config: %v", err)
 	}
 
-	l.WithGroup("main").Info(fmt.Sprintf("config loaded successfully (prod config: %v)", isProdValue))
+	l.WithGroup("main").Info("config loaded successfully")
 
 	return c
 }
@@ -145,8 +131,12 @@ func mustInitGormDB(l *slog.Logger, cfg cfg.Postgres) *gorm.DB {
 		utils.LogFatalf(l, "failed to get raw DB: %f", err)
 	}
 
-	sqlDB.SetMaxIdleConns(10)
-	sqlDB.SetMaxOpenConns(100)
+	if cfg.MaxIdleConns > 0 {
+		sqlDB.SetMaxIdleConns(cfg.MaxIdleConns)
+	}
+	if cfg.MaxOpenConns > 0 {
+		sqlDB.SetMaxOpenConns(cfg.MaxOpenConns)
+	}
 	sqlDB.SetConnMaxLifetime(time.Hour)
 
 	if err := sqlDB.Ping(); err != nil {
